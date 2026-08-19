@@ -1,26 +1,10 @@
-# Lab01 — Mineração de Repositórios Populares do GitHub
+# Mineração de Repositórios Populares do GitHub
 
-Projeto da disciplina **Laboratório de Experimentação de Software** (Engenharia de Software, PUC Minas). Investiga, com dados, se os 1000 repositórios com mais estrelas do GitHub sustentam a fama de "maduros e bem cuidados" que costuma ser atribuída a projetos populares — e acompanha, em paralelo, o processo do próprio laboratório num quadro Kanban (GitHub Projects v2).
+Projeto da disciplina **Laboratório de Experimentação de Software** (Engenharia de Software, PUC Minas). Investiga, com dados, se os 1000 repositórios com mais estrelas do GitHub sustentam a fama de "maduros e bem cuidados" que costuma ser atribuída a projetos populares e acompanha, em paralelo, o processo do próprio laboratório num quadro Kanban (GitHub Projects v2).
 
 ## Integrante
 
 - Gabriel Cardoso ([@Cardosoooo](https://github.com/Cardosoooo))
-
-## O que o projeto analisa
-
-A coleta mede, para cada um dos 1000 repositórios, os dados necessários para responder a 7 Questões de Pesquisa (RQs):
-
-| RQ | Pergunta |
-|---|---|
-| RQ01 | Sistemas populares são maduros/antigos? |
-| RQ02 | Recebem muita contribuição externa? |
-| RQ03 | Lançam releases com frequência? |
-| RQ04 | São atualizados com frequência? |
-| RQ05 | São escritos nas linguagens mais populares? |
-| RQ06 | Possuem um alto percentual de issues fechadas? |
-| RQ07 | Repositórios em linguagens populares recebem mais contribuição, releases e atualizações? |
-
-A definição de métrica e o campo coletado para cada RQ estão na seção [Mapeamento das Questões de Pesquisa](#mapeamento-das-questões-de-pesquisa) abaixo. A análise e visualização desses dados (respondendo de fato as RQs) é entregue na Lab01S03 — até aqui o projeto cobre coleta, persistência dos dados e o processo do Kanban.
 
 ## Estrutura do projeto
 
@@ -35,12 +19,10 @@ lab-experimentacao-software/
 │   ├── repositorios_raw.json   # resposta bruta da API (auditoria/debug)
 │   └── snapshots/              # um CSV por execução do ExportadorKanban (kanban_<data>.csv)
 ├── relatorio/
-│   └── introducao_rascunho.md  # rascunho da Introdução do relatório final (hipóteses informais)
+│   └── introducao_rascunho.md  # rascunho da Introdução do relatório final
 ├── .gitignore
 └── README.md
 ```
-
-Não há build tool (Maven/Gradle) de propósito — o enunciado proíbe bibliotecas de terceiros para consultar a API do GitHub, e mantendo tudo em Java puro (`javac`/`java` direto) fica mais simples auditar que nenhuma dependência externa entra na consulta.
 
 ## Pré-requisitos
 
@@ -51,7 +33,7 @@ Não há build tool (Maven/Gradle) de propósito — o enunciado proíbe bibliot
 
 ## Configuração
 
-O token **não** é commitado — ele é lido da variável de ambiente `GITHUB_TOKEN`.
+O token **não** é commitado, ele é lido da variável de ambiente `GITHUB_TOKEN`.
 
 PowerShell:
 
