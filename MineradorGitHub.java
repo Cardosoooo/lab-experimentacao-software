@@ -1,27 +1,21 @@
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Lab01S01 - coleta via GraphQL dos dados/metricas necessarios para as RQ01-RQ07
- * de uma amostra de 100 repositorios (por estrelas). Sem bibliotecas de terceiros
- * para consultar a API do GitHub, conforme exigido no enunciado.
+ * Lab01S02 - coleta via GraphQL dos dados/metricas das RQ01-RQ07 para os 1000
+ * repositorios com mais estrelas do GitHub. A consulta e sempre por lotes (PAGE_SIZE),
+ * nunca os 1000 de uma vez, porque pedir issues.totalCount duas vezes por repositorio
+ * (RQ06) fica pesado pra API e comecava a dar timeout com lotes grandes.
  */
 public class MineradorGitHub {
 
-    private static final int REPO_COUNT = 100;
+    private static final int REPO_COUNT = 1000;
     private static final int PAGE_SIZE = 10;
-    private static final int MAX_RETRIES = 4;
-    private static final long BASE_BACKOFF_MS = 2000;
     private static final String OUTPUT_DIR = "data";
 
     public static void main(String[] args) {
@@ -36,7 +30,7 @@ public class MineradorGitHub {
             System.out.println("Repositorios recebidos: " + nodes.size());
 
             Files.createDirectories(Path.of(OUTPUT_DIR));
-            Files.writeString(Path.of(OUTPUT_DIR, "repositorios_raw.json"), stringify(nodes), StandardCharsets.UTF_8);
+            Files.writeString(Path.of(OUTPUT_DIR, "repositorios_raw.json"), GitHubGraphQL.stringify(nodes), StandardCharsets.UTF_8);
             saveCsv(nodes);
 
             System.out.println("Dados salvos em " + OUTPUT_DIR + "/repositorios_raw.json e " + OUTPUT_DIR + "/repositorios.csv");
@@ -46,24 +40,16 @@ public class MineradorGitHub {
         }
     }
 
-    /**
-     * Coleta REPO_COUNT repositorios em lotes de PAGE_SIZE. Pedir issues.totalCount duas vezes
-     * (total e fechadas) para 100 repositorios de uma vez e caro o suficiente para a API do
-     * GitHub estourar timeout (502/504); lotes menores + retry evitam isso.
-     */
+    // A busca do GitHub (campo "search") pagina com cursor, tipo lista encadeada: cada
+    // resposta devolve um "endCursor" que a gente manda de volta na proxima chamada pra
+    // continuar de onde parou. hasNextPage=false quer dizer que acabaram os repositorios.
     private static List<Map<String, Object>> fetchAllRepositories(String token) throws IOException, InterruptedException {
         List<Map<String, Object>> all = new ArrayList<>();
         String cursor = null;
 
         while (all.size() < REPO_COUNT) {
             int pageSize = Math.min(PAGE_SIZE, REPO_COUNT - all.size());
-            String body = fetchWithRetry(buildQuery(pageSize, cursor), token);
-
-            @SuppressWarnings("unchecked")
-            Map<String, Object> json = (Map<String, Object>) MiniJson.parse(body);
-            if (json.containsKey("errors")) {
-                throw new IOException("A API do GitHub retornou erros: " + json.get("errors"));
-            }
+            Map<String, Object> json = GitHubGraphQL.query(buildQuery(pageSize, cursor), token);
 
             @SuppressWarnings("unchecked")
             Map<String, Object> data = (Map<String, Object>) json.get("data");
@@ -83,24 +69,6 @@ public class MineradorGitHub {
         }
 
         return all;
-    }
-
-    private static String fetchWithRetry(String query, String token) throws IOException, InterruptedException {
-        int attempt = 0;
-        while (true) {
-            attempt++;
-            try {
-                return executeQuery(query, token);
-            } catch (GraphQLHttpException e) {
-                boolean retryable = e.statusCode == 502 || e.statusCode == 503 || e.statusCode == 504;
-                if (!retryable || attempt >= MAX_RETRIES) {
-                    throw e;
-                }
-                long backoffMs = BASE_BACKOFF_MS * (1L << (attempt - 1));
-                System.out.println("HTTP " + e.statusCode + " (tentativa " + attempt + "/" + MAX_RETRIES + "), nova tentativa em " + (backoffMs / 1000) + "s...");
-                Thread.sleep(backoffMs);
-            }
-        }
     }
 
     private static String buildQuery(int pageSize, String cursor) {
@@ -127,33 +95,6 @@ public class MineradorGitHub {
         // nameWithOwner + createdAt -> RQ01 | pullRequests -> RQ02 | releases -> RQ03
         // updatedAt -> RQ04 | primaryLanguage -> RQ05 | totalIssues/closedIssues -> RQ06
         // RQ07 e derivada de RQ02+RQ03+RQ04 agrupadas por linguagem, sem campo proprio.
-    }
-
-    private static String executeQuery(String query, String token) throws IOException, InterruptedException {
-        String body = "{\"query\": \"" + jsonEscape(query) + "\"}";
-
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.github.com/graphql"))
-                .header("Authorization", "Bearer " + token)
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(body, StandardCharsets.UTF_8))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw new GraphQLHttpException(response.statusCode(), response.body());
-        }
-        return response.body();
-    }
-
-    private static final class GraphQLHttpException extends IOException {
-        final int statusCode;
-
-        GraphQLHttpException(int statusCode, String body) {
-            super("HTTP " + statusCode + ": " + body);
-            this.statusCode = statusCode;
-        }
     }
 
     private static void saveCsv(List<Map<String, Object>> nodes) throws IOException {
@@ -196,184 +137,5 @@ public class MineradorGitHub {
             return "\"" + value.replace("\"", "\"\"") + "\"";
         }
         return value;
-    }
-
-    private static String stringify(Object value) {
-        StringBuilder sb = new StringBuilder();
-        stringify(value, sb);
-        return sb.toString();
-    }
-
-    private static void stringify(Object value, StringBuilder sb) {
-        if (value == null) {
-            sb.append("null");
-        } else if (value instanceof String s) {
-            sb.append('"').append(jsonEscape(s)).append('"');
-        } else if (value instanceof Number || value instanceof Boolean) {
-            sb.append(value);
-        } else if (value instanceof Map<?, ?> map) {
-            sb.append('{');
-            boolean first = true;
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
-                if (!first) sb.append(',');
-                first = false;
-                sb.append('"').append(jsonEscape(String.valueOf(entry.getKey()))).append("\":");
-                stringify(entry.getValue(), sb);
-            }
-            sb.append('}');
-        } else if (value instanceof List<?> list) {
-            sb.append('[');
-            boolean first = true;
-            for (Object item : list) {
-                if (!first) sb.append(',');
-                first = false;
-                stringify(item, sb);
-            }
-            sb.append(']');
-        }
-    }
-
-    private static String jsonEscape(String raw) {
-        StringBuilder sb = new StringBuilder(raw.length());
-        for (int i = 0; i < raw.length(); i++) {
-            char c = raw.charAt(i);
-            switch (c) {
-                case '"' -> sb.append("\\\"");
-                case '\\' -> sb.append("\\\\");
-                case '\n' -> sb.append("\\n");
-                case '\r' -> sb.append("\\r");
-                case '\t' -> sb.append("\\t");
-                default -> sb.append(c);
-            }
-        }
-        return sb.toString();
-    }
-
-    /** Parser JSON minimo (sem dependencias externas) para o formato de resposta da API GraphQL do GitHub. */
-    private static final class MiniJson {
-        private final String src;
-        private int pos;
-
-        private MiniJson(String src) {
-            this.src = src;
-        }
-
-        static Object parse(String json) {
-            MiniJson parser = new MiniJson(json);
-            parser.skipWhitespace();
-            return parser.parseValue();
-        }
-
-        private Object parseValue() {
-            char c = src.charAt(pos);
-            return switch (c) {
-                case '{' -> parseObject();
-                case '[' -> parseArray();
-                case '"' -> parseString();
-                case 't', 'f' -> parseBoolean();
-                case 'n' -> parseNull();
-                default -> parseNumber();
-            };
-        }
-
-        private Map<String, Object> parseObject() {
-            Map<String, Object> map = new LinkedHashMap<>();
-            pos++;
-            skipWhitespace();
-            if (src.charAt(pos) == '}') {
-                pos++;
-                return map;
-            }
-            while (true) {
-                skipWhitespace();
-                String key = parseString();
-                skipWhitespace();
-                pos++;
-                skipWhitespace();
-                map.put(key, parseValue());
-                skipWhitespace();
-                if (src.charAt(pos++) == '}') break;
-            }
-            return map;
-        }
-
-        private List<Object> parseArray() {
-            List<Object> list = new ArrayList<>();
-            pos++;
-            skipWhitespace();
-            if (src.charAt(pos) == ']') {
-                pos++;
-                return list;
-            }
-            while (true) {
-                skipWhitespace();
-                list.add(parseValue());
-                skipWhitespace();
-                if (src.charAt(pos++) == ']') break;
-            }
-            return list;
-        }
-
-        private String parseString() {
-            pos++;
-            StringBuilder sb = new StringBuilder();
-            while (true) {
-                char c = src.charAt(pos++);
-                if (c == '"') break;
-                if (c == '\\') {
-                    char esc = src.charAt(pos++);
-                    switch (esc) {
-                        case '"' -> sb.append('"');
-                        case '\\' -> sb.append('\\');
-                        case '/' -> sb.append('/');
-                        case 'b' -> sb.append('\b');
-                        case 'f' -> sb.append('\f');
-                        case 'n' -> sb.append('\n');
-                        case 'r' -> sb.append('\r');
-                        case 't' -> sb.append('\t');
-                        case 'u' -> {
-                            sb.append((char) Integer.parseInt(src.substring(pos, pos + 4), 16));
-                            pos += 4;
-                        }
-                        default -> sb.append(esc);
-                    }
-                } else {
-                    sb.append(c);
-                }
-            }
-            return sb.toString();
-        }
-
-        private Boolean parseBoolean() {
-            if (src.startsWith("true", pos)) {
-                pos += 4;
-                return Boolean.TRUE;
-            }
-            pos += 5;
-            return Boolean.FALSE;
-        }
-
-        private Object parseNull() {
-            pos += 4;
-            return null;
-        }
-
-        private Number parseNumber() {
-            int start = pos;
-            while (pos < src.length() && "-+.eE0123456789".indexOf(src.charAt(pos)) >= 0) {
-                pos++;
-            }
-            String number = src.substring(start, pos);
-            if (number.contains(".") || number.contains("e") || number.contains("E")) {
-                return Double.parseDouble(number);
-            }
-            return Long.parseLong(number);
-        }
-
-        private void skipWhitespace() {
-            while (pos < src.length() && Character.isWhitespace(src.charAt(pos))) {
-                pos++;
-            }
-        }
     }
 }
