@@ -2,7 +2,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -25,15 +27,25 @@ public class MineradorGitHub {
             System.exit(1);
         }
 
+        // Fixado uma unica vez no inicio da execucao: e o "hoje" usado depois pra calcular
+        // idade (RQ01) e tempo desde a ultima atualizacao (RQ04) na analise (S03). Sem isso
+        // gravado junto aos dados, analisar o CSV em outro dia daria um resultado diferente
+        // do que a coleta original mediu.
+        String collectedAt = Instant.now().toString();
+
         try {
             List<Map<String, Object>> nodes = fetchAllRepositories(token);
             System.out.println("Repositorios recebidos: " + nodes.size());
 
-            Files.createDirectories(Path.of(OUTPUT_DIR));
-            Files.writeString(Path.of(OUTPUT_DIR, "repositorios_raw.json"), GitHubGraphQL.stringify(nodes), StandardCharsets.UTF_8);
-            saveCsv(nodes);
+            Map<String, Object> raw = new LinkedHashMap<>();
+            raw.put("collectedAt", collectedAt);
+            raw.put("repositories", nodes);
 
-            System.out.println("Dados salvos em " + OUTPUT_DIR + "/repositorios_raw.json e " + OUTPUT_DIR + "/repositorios.csv");
+            Files.createDirectories(Path.of(OUTPUT_DIR));
+            Files.writeString(Path.of(OUTPUT_DIR, "repositorios_raw.json"), GitHubGraphQL.stringify(raw), StandardCharsets.UTF_8);
+            saveCsv(nodes, collectedAt);
+
+            System.out.println("Dados salvos em " + OUTPUT_DIR + "/repositorios_raw.json e " + OUTPUT_DIR + "/repositorios.csv (collectedAt=" + collectedAt + ")");
         } catch (IOException | InterruptedException e) {
             System.err.println("Falha ao executar a consulta: " + e.getMessage());
             System.exit(1);
@@ -97,10 +109,10 @@ public class MineradorGitHub {
         // RQ07 e derivada de RQ02+RQ03+RQ04 agrupadas por linguagem, sem campo proprio.
     }
 
-    private static void saveCsv(List<Map<String, Object>> nodes) throws IOException {
+    private static void saveCsv(List<Map<String, Object>> nodes, String collectedAt) throws IOException {
         List<String> header = List.of(
                 "nameWithOwner", "createdAt", "updatedAt", "primaryLanguage",
-                "mergedPullRequests", "releases", "totalIssues", "closedIssues"
+                "mergedPullRequests", "releases", "totalIssues", "closedIssues", "collectedAt"
         );
         StringBuilder csv = new StringBuilder(String.join(",", header)).append("\n");
 
@@ -115,7 +127,8 @@ public class MineradorGitHub {
                     .append(totalCount(node.get("pullRequests"))).append(",")
                     .append(totalCount(node.get("releases"))).append(",")
                     .append(totalCount(node.get("totalIssues"))).append(",")
-                    .append(totalCount(node.get("closedIssues"))).append("\n");
+                    .append(totalCount(node.get("closedIssues"))).append(",")
+                    .append(csvField(collectedAt)).append("\n");
         }
 
         Files.writeString(Path.of(OUTPUT_DIR, "repositorios.csv"), csv.toString(), StandardCharsets.UTF_8);
