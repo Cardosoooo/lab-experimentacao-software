@@ -64,9 +64,9 @@ O parsing e o envio da query GraphQL ficam em `GitHubGraphQL.java`, compartilhad
 | RQ06 | Alto percentual de issues fechadas? | Issues fechadas / total de issues | `totalIssues`, `closedIssues` |
 | RQ07 | Linguagens populares recebem mais contribuição/releases/updates? | RQ02, RQ03 e RQ04 agrupadas por linguagem | derivado dos campos acima na análise |
 
-RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de idade e de tempo desde a última atualização é feito na etapa de análise (Lab01S03), não na coleta.
+RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de idade e de tempo desde a última atualização é feito na etapa de análise (Lab01S03), não na coleta — usando sempre `collectedAt` (gravado em toda linha do CSV) como data de referência, não a data em que a análise for rodada. Isso garante que o resultado não mude dependendo de quando o script de análise é executado.
 
-Fonte de referência para "linguagens mais populares" (RQ05/RQ07): `<definir e manter a mesma ao longo do laboratório — ex. GitHub Octoverse>`.
+**Fonte de referência para "linguagens mais populares" (RQ05/RQ07):** [GitHub Octoverse 2025](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/), ranking por número de contribuidores. Consideradas populares: TypeScript, Python, JavaScript, Java, C#, PHP, Shell, C++, HCL e Go. Essa referência é fixa para o laboratório inteiro — não muda entre sprints.
 
 ## Restrições do enunciado
 

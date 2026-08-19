@@ -28,7 +28,8 @@ issues) realmente sustentam essa fama de "maduro e bem cuidado".
 
 - **RQ05** — São escritos nas linguagens mais populares?
   Sim, a maior parte deve estar concentrada em poucas linguagens do topo do
-  ranking (ex.: JavaScript/TypeScript, Python, Java).
+  ranking do [GitHub Octoverse 2025](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/)
+  (TypeScript, Python, JavaScript, Java, C#, PHP, Shell, C++, HCL, Go).
 
 - **RQ06** — Alto percentual de issues fechadas?
   Sim, proporção alta de issues fechadas, mas com ressalva: isso pode
