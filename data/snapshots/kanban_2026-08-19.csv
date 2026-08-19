@@ -1,0 +1,9 @@
+snapshotDate,issueNumber,title,status,issueState,assignees
+2026-08-19,8,Rascunho da Introdução com hipóteses informais,Review,OPEN,Cardosoooo
+2026-08-19,1,Configurar GitHub Projects e criar Issues (Sprint 1),Done,CLOSED,Cardosoooo
+2026-08-19,2,Query GraphQL para RQ01 e RQ02 (Idade e PRs),Done,CLOSED,Cardosoooo
+2026-08-19,3,Query GraphQL para RQ03 e RQ04 (Releases e Atualizações),Done,CLOSED,Cardosoooo
+2026-08-19,4,"Query GraphQL para RQ05, RQ06 e RQ07 (Linguagem e Issues)",Done,CLOSED,Cardosoooo
+2026-08-19,5,Integrar script Java de requisição automática (100 repos),Done,CLOSED,Cardosoooo
+2026-08-19,6,Paginação para 1000 repositórios,Done,CLOSED,Cardosoooo
+2026-08-19,7,Script de exportação de snapshot do Kanban,Done,CLOSED,Cardosoooo
