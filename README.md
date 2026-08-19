@@ -99,11 +99,6 @@ RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de i
 
 `Testes.java` cobre os utilitários de `GitHubGraphQL.java` (parser JSON, escape de JSON/CSV) e os helpers específicos de cada script (`MineradorGitHub.totalCount`, `ExportadorKanban.assigneeLogins`), sem depender de rede — os testes usam JSON de exemplo, não fazem chamada real à API. Não usa JUnit nem nenhum framework: só `System.exit(1)` se algo falhar, o suficiente para o tamanho do projeto e consistente com a regra de não usar bibliotecas de terceiros.
 
-## Restrições do enunciado
-
-- Nenhuma biblioteca de terceiros consulta a API do GitHub — a query GraphQL e o parsing da resposta são implementados no próprio `GitHubGraphQL.java` (parser JSON mínimo incluso, sem dependências externas).
-- Cada commit referencia o número da Issue correspondente (ex.: `#12 implementa consulta GraphQL`).
-
 ## Configuração do processo (GitHub Projects)
 
 - **Repositório:** https://github.com/Cardosoooo/lab-experimentacao-software
