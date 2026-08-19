@@ -120,6 +120,23 @@ public final class GitHubGraphQL {
         }
     }
 
+    /** Exposto pra dar pra testar o parser isolado, sem precisar de uma chamada de rede de verdade. */
+    public static Object parseJson(String json) {
+        return MiniJson.parse(json);
+    }
+
+    /** Usado pelos dois scripts pra montar CSV: envolve em aspas se tiver virgula, aspas ou quebra de linha. */
+    public static String csvField(String value) {
+        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
+            return "\"" + value.replace("\"", "\"\"") + "\"";
+        }
+        return value;
+    }
+
+    public static String str(Object value) {
+        return value == null ? "" : value.toString();
+    }
+
     public static String jsonEscape(String raw) {
         StringBuilder sb = new StringBuilder(raw.length());
         for (int i = 0; i < raw.length(); i++) {

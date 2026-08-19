@@ -120,35 +120,25 @@ public class MineradorGitHub {
             @SuppressWarnings("unchecked")
             Map<String, Object> language = (Map<String, Object>) node.get("primaryLanguage");
 
-            csv.append(csvField(str(node.get("nameWithOwner")))).append(",")
-                    .append(csvField(str(node.get("createdAt")))).append(",")
-                    .append(csvField(str(node.get("updatedAt")))).append(",")
-                    .append(csvField(language != null ? str(language.get("name")) : "")).append(",")
+            csv.append(GitHubGraphQL.csvField(GitHubGraphQL.str(node.get("nameWithOwner")))).append(",")
+                    .append(GitHubGraphQL.csvField(GitHubGraphQL.str(node.get("createdAt")))).append(",")
+                    .append(GitHubGraphQL.csvField(GitHubGraphQL.str(node.get("updatedAt")))).append(",")
+                    .append(GitHubGraphQL.csvField(language != null ? GitHubGraphQL.str(language.get("name")) : "")).append(",")
                     .append(totalCount(node.get("pullRequests"))).append(",")
                     .append(totalCount(node.get("releases"))).append(",")
                     .append(totalCount(node.get("totalIssues"))).append(",")
                     .append(totalCount(node.get("closedIssues"))).append(",")
-                    .append(csvField(collectedAt)).append("\n");
+                    .append(GitHubGraphQL.csvField(collectedAt)).append("\n");
         }
 
         Files.writeString(Path.of(OUTPUT_DIR, "repositorios.csv"), csv.toString(), StandardCharsets.UTF_8);
     }
 
+    /** Package-private (sem "private") de proposito, pra dar pra chamar direto do Testes.java. */
     @SuppressWarnings("unchecked")
-    private static long totalCount(Object field) {
+    static long totalCount(Object field) {
         if (field == null) return 0;
         Object value = ((Map<String, Object>) field).get("totalCount");
         return value instanceof Number number ? number.longValue() : 0;
-    }
-
-    private static String str(Object value) {
-        return value == null ? "" : value.toString();
-    }
-
-    private static String csvField(String value) {
-        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
-            return "\"" + value.replace("\"", "\"\"") + "\"";
-        }
-        return value;
     }
 }

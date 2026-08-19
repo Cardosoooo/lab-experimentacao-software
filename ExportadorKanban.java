@@ -115,39 +115,29 @@ public class ExportadorKanban {
 
             @SuppressWarnings("unchecked")
             Map<String, Object> statusField = (Map<String, Object>) item.get("fieldValueByName");
-            String status = statusField != null ? str(statusField.get("name")) : "";
+            String status = statusField != null ? GitHubGraphQL.str(statusField.get("name")) : "";
 
-            csv.append(csvField(snapshotDate)).append(",")
-                    .append(csvField(str(content.get("number")))).append(",")
-                    .append(csvField(str(content.get("title")))).append(",")
-                    .append(csvField(status)).append(",")
-                    .append(csvField(str(content.get("state")))).append(",")
-                    .append(csvField(assigneeLogins(content))).append("\n");
+            csv.append(GitHubGraphQL.csvField(snapshotDate)).append(",")
+                    .append(GitHubGraphQL.csvField(GitHubGraphQL.str(content.get("number")))).append(",")
+                    .append(GitHubGraphQL.csvField(GitHubGraphQL.str(content.get("title")))).append(",")
+                    .append(GitHubGraphQL.csvField(status)).append(",")
+                    .append(GitHubGraphQL.csvField(GitHubGraphQL.str(content.get("state")))).append(",")
+                    .append(GitHubGraphQL.csvField(assigneeLogins(content))).append("\n");
         }
 
         Files.writeString(csvPath, csv.toString(), StandardCharsets.UTF_8);
     }
 
+    /** Package-private (sem "private") de proposito, pra dar pra chamar direto do Testes.java. */
     @SuppressWarnings("unchecked")
-    private static String assigneeLogins(Map<String, Object> content) {
+    static String assigneeLogins(Map<String, Object> content) {
         Map<String, Object> assignees = (Map<String, Object>) content.get("assignees");
         List<Map<String, Object>> nodes = (List<Map<String, Object>>) assignees.get("nodes");
         StringBuilder sb = new StringBuilder();
         for (Map<String, Object> node : nodes) {
             if (sb.length() > 0) sb.append(";");
-            sb.append(str(node.get("login")));
+            sb.append(GitHubGraphQL.str(node.get("login")));
         }
         return sb.toString();
-    }
-
-    private static String str(Object value) {
-        return value == null ? "" : value.toString();
-    }
-
-    private static String csvField(String value) {
-        if (value.contains(",") || value.contains("\"") || value.contains("\n")) {
-            return "\"" + value.replace("\"", "\"\"") + "\"";
-        }
-        return value;
     }
 }
