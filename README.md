@@ -1,19 +1,55 @@
-# Lab01 — Laboratório de Experimentação de Software
+# Lab01 — Mineração de Repositórios Populares do GitHub
 
-Coleta e análise de características de repositórios populares no GitHub (LAB01), acompanhada do uso do GitHub Projects como quadro Kanban do grupo.
+Projeto da disciplina **Laboratório de Experimentação de Software** (Engenharia de Software, PUC Minas). Investiga, com dados, se os 1000 repositórios com mais estrelas do GitHub sustentam a fama de "maduros e bem cuidados" que costuma ser atribuída a projetos populares — e acompanha, em paralelo, o processo do próprio laboratório num quadro Kanban (GitHub Projects v2).
 
-## Sprint atual: Lab01S02
+## Integrante
 
-Paginação para 1000 repositórios + dados em `.csv` + script de snapshot do Kanban.
+- Gabriel Cardoso ([@Cardosoooo](https://github.com/Cardosoooo))
 
-### Pré-requisitos
+## O que o projeto analisa
+
+A coleta mede, para cada um dos 1000 repositórios, os dados necessários para responder a 7 Questões de Pesquisa (RQs):
+
+| RQ | Pergunta |
+|---|---|
+| RQ01 | Sistemas populares são maduros/antigos? |
+| RQ02 | Recebem muita contribuição externa? |
+| RQ03 | Lançam releases com frequência? |
+| RQ04 | São atualizados com frequência? |
+| RQ05 | São escritos nas linguagens mais populares? |
+| RQ06 | Possuem um alto percentual de issues fechadas? |
+| RQ07 | Repositórios em linguagens populares recebem mais contribuição, releases e atualizações? |
+
+A definição de métrica e o campo coletado para cada RQ estão na seção [Mapeamento das Questões de Pesquisa](#mapeamento-das-questões-de-pesquisa) abaixo. A análise e visualização desses dados (respondendo de fato as RQs) é entregue na Lab01S03 — até aqui o projeto cobre coleta, persistência dos dados e o processo do Kanban.
+
+## Estrutura do projeto
+
+```
+lab-experimentacao-software/
+├── MineradorGitHub.java        # coleta os 1000 repositórios via GraphQL (RQ01-RQ07)
+├── ExportadorKanban.java       # snapshot do board GitHub Projects (v2) em CSV
+├── GitHubGraphQL.java          # utilitário compartilhado: HTTP/retry, parser JSON e helpers de CSV
+├── Testes.java                 # testes automatizados desses utilitários (sem framework externo)
+├── data/
+│   ├── repositorios.csv        # dataset principal: 1000 repositórios, uma linha por repositório
+│   ├── repositorios_raw.json   # resposta bruta da API (auditoria/debug)
+│   └── snapshots/              # um CSV por execução do ExportadorKanban (kanban_<data>.csv)
+├── relatorio/
+│   └── introducao_rascunho.md  # rascunho da Introdução do relatório final (hipóteses informais)
+├── .gitignore
+└── README.md
+```
+
+Não há build tool (Maven/Gradle) de propósito — o enunciado proíbe bibliotecas de terceiros para consultar a API do GitHub, e mantendo tudo em Java puro (`javac`/`java` direto) fica mais simples auditar que nenhuma dependência externa entra na consulta.
+
+## Pré-requisitos
 
 - JDK 17 ou superior
 - Um [Personal Access Token do GitHub](https://github.com/settings/tokens) (classic):
   - escopo `public_repo` — usado pelo `MineradorGitHub`
   - escopo `project` — usado pelo `ExportadorKanban` (ler o GitHub Projects v2 exige esse escopo, `public_repo` não é suficiente)
 
-### Configuração
+## Configuração
 
 O token **não** é commitado — ele é lido da variável de ambiente `GITHUB_TOKEN`.
 
@@ -29,28 +65,37 @@ Bash:
 export GITHUB_TOKEN="seu_token_aqui"
 ```
 
-### Executar
+## Executar
+
+Compilar:
+
+```bash
+javac *.java
+```
 
 Coleta dos repositórios (RQ01–RQ07):
 
 ```bash
-javac *.java
 java MineradorGitHub
 ```
 
-Snapshot do Kanban (roda de novo em cada sprint/aula, gera um CSV novo por data):
+Snapshot do Kanban (rodar de novo a cada semana/aula, conforme exigido no processo — gera um CSV novo por data):
 
 ```bash
 java ExportadorKanban
 ```
 
+Testes automatizados:
+
+```bash
+java Testes
+```
+
 Saída salva automaticamente em:
 
-- `data/repositorios_raw.json` — resposta bruta da API (auditoria/debug)
-- `data/repositorios.csv` — 1000 repositórios, uma linha por repositório
+- `data/repositorios_raw.json` — resposta bruta da API
+- `data/repositorios.csv` — 1000 repositórios, com `collectedAt` (data/hora da coleta) em cada linha
 - `data/snapshots/kanban_<data>.csv` — estado do board na data da execução; a série completa desses arquivos é a base de dados usada nos Labs 04/05
-
-O parsing e o envio da query GraphQL ficam em `GitHubGraphQL.java`, compartilhado pelos dois scripts.
 
 ## Mapeamento das Questões de Pesquisa
 
@@ -64,13 +109,17 @@ O parsing e o envio da query GraphQL ficam em `GitHubGraphQL.java`, compartilhad
 | RQ06 | Alto percentual de issues fechadas? | Issues fechadas / total de issues | `totalIssues`, `closedIssues` |
 | RQ07 | Linguagens populares recebem mais contribuição/releases/updates? | RQ02, RQ03 e RQ04 agrupadas por linguagem | derivado dos campos acima na análise |
 
-RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de idade e de tempo desde a última atualização é feito na etapa de análise (Lab01S03), não na coleta — usando sempre `collectedAt` (gravado em toda linha do CSV) como data de referência, não a data em que a análise for rodada. Isso garante que o resultado não mude dependendo de quando o script de análise é executado.
+RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de idade e de tempo desde a última atualização é feito na etapa de análise (Lab01S03), sempre a partir de `collectedAt` (gravado em toda linha do CSV) como data de referência — não da data em que a análise for rodada. Isso garante que o resultado não mude dependendo de quando o script de análise é executado.
 
-**Fonte de referência para "linguagens mais populares" (RQ05/RQ07):** [GitHub Octoverse 2025](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/), ranking por número de contribuidores. Consideradas populares: TypeScript, Python, JavaScript, Java, C#, PHP, Shell, C++, HCL e Go. Essa referência é fixa para o laboratório inteiro — não muda entre sprints.
+**Fonte de referência para "linguagens mais populares" (RQ05/RQ07):** [GitHub Octoverse 2025](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/), ranking por número de contribuidores. Consideradas populares: TypeScript, Python, JavaScript, Java, C#, PHP, Shell, C++, HCL e Go. Referência fixa para o laboratório inteiro — não muda entre sprints.
+
+## Testes automatizados
+
+`Testes.java` cobre os utilitários de `GitHubGraphQL.java` (parser JSON, escape de JSON/CSV) e os helpers específicos de cada script (`MineradorGitHub.totalCount`, `ExportadorKanban.assigneeLogins`), sem depender de rede — os testes usam JSON de exemplo, não fazem chamada real à API. Não usa JUnit nem nenhum framework: só `System.exit(1)` se algo falhar, o suficiente para o tamanho do projeto e consistente com a regra de não usar bibliotecas de terceiros.
 
 ## Restrições do enunciado
 
-- Nenhuma biblioteca de terceiros consulta a API do GitHub — a query GraphQL e o parsing da resposta são implementados no próprio `MineradorGitHub.java` (parser JSON mínimo incluso, sem dependências externas).
+- Nenhuma biblioteca de terceiros consulta a API do GitHub — a query GraphQL e o parsing da resposta são implementados no próprio `GitHubGraphQL.java` (parser JSON mínimo incluso, sem dependências externas).
 - Cada commit referencia o número da Issue correspondente (ex.: `#12 implementa consulta GraphQL`).
 
 ## Configuração do processo (GitHub Projects)
@@ -83,6 +132,6 @@ RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de i
 ## Roadmap das sprints
 
 - **Lab01S01** ✅: consulta para 100 repositórios + GitHub Projects criado.
-- **Lab01S02** (atual): paginação para 1000 repositórios, dados em `.csv`, primeira versão do relatório com hipóteses informais, snapshot do board exportado.
-- **Lab01S03**: análise e visualização de dados para as 7 RQs.
+- **Lab01S02** ✅: paginação para 1000 repositórios, dados em `.csv`, primeira versão do relatório com hipóteses informais, snapshot do board exportado.
+- **Lab01S03** (próxima): análise e visualização de dados para as 7 RQs.
 - **Relatório Final**: documento consolidado com introdução, metodologia, resultados, discussão e seção de configuração do processo.
