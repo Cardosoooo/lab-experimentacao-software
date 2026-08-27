@@ -1,3 +1,7 @@
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +21,7 @@ public class Testes {
     private static int passed = 0;
     private static int failed = 0;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         testJsonEscape();
         testCsvField();
         testStr();
@@ -28,6 +32,8 @@ public class Testes {
         testMediana();
         testQuartil();
         testCincoNumeros();
+        testCacheFileKey();
+        testCacheRoundTrip();
 
         System.out.println();
         System.out.println(passed + " passaram, " + failed + " falharam");
@@ -128,6 +134,37 @@ public class Testes {
         check("cincoNumeros identifica a mediana", resumo[2] == 4.5);
         check("cincoNumeros identifica o maximo", resumo[4] == 8.0);
         check("cincoNumeros mantem p25 <= mediana <= p75", resumo[1] <= resumo[2] && resumo[2] <= resumo[3]);
+    }
+
+    private static void testCacheFileKey() {
+        Path dir = Path.of("data", "cache");
+        check("cacheFile nomeia a pagina 0 como 0.json", MineradorGitHub.cacheFile(dir, 0).getFileName().toString().equals("0.json"));
+        check("cacheFile nomeia a pagina 13 como 13.json", MineradorGitHub.cacheFile(dir, 13).getFileName().toString().equals("13.json"));
+        check("cacheFile mante o diretorio pai", MineradorGitHub.cacheFile(dir, 0).getParent().equals(dir));
+    }
+
+    // Round-trip do cache: escreve uma resposta bruta de pagina (mesmo formato da API,
+    // salvo pelo MineradorGitHub) e verifica que readCachedPage reconstrói nodes e pageInfo,
+    // preservando o endCursor usado na retomada.
+    @SuppressWarnings("unchecked")
+    private static void testCacheRoundTrip() throws IOException {
+        String raw = "{\"data\":{\"search\":{"
+                + "\"pageInfo\":{\"hasNextPage\":true,\"endCursor\":\"Y3Vyc29yOg==\"},"
+                + "\"nodes\":[{\"nameWithOwner\":\"foo/bar\",\"primaryLanguage\":{\"name\":\"Java\"},"
+                + "\"pullRequests\":{\"totalCount\":7}}]}}}";
+
+        Path dir = Files.createTempDirectory("cachetest");
+        Path file = dir.resolve("0.json");
+        Files.writeString(file, raw, StandardCharsets.UTF_8);
+
+        MineradorGitHub.PageData page = MineradorGitHub.readCachedPage(file);
+        check("readCachedPage le a quantidade certa de nodes", page.nodes.size() == 1);
+        check("readCachedPage preserva o node", "foo/bar".equals(page.nodes.get(0).get("nameWithOwner")));
+        check("readCachedPage preserva o endCursor", "Y3Vyc29yOg==".equals(page.pageInfo.get("endCursor")));
+        check("readCachedPage preserva hasNextPage", Boolean.TRUE.equals(page.pageInfo.get("hasNextPage")));
+
+        Files.deleteIfExists(file);
+        Files.deleteIfExists(dir);
     }
 
     private static void check(String descricao, boolean condicao) {
