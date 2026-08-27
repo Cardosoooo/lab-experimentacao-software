@@ -1,29 +1,29 @@
 linguagem,popular,quantidade,pr_mediana,releases_mediana,dias_desde_atualizacao_mediana
-Python,true,228,534.50,21.00,0.00
-TypeScript,true,172,1977.00,134.00,0.00
+Python,true,228,535.50,21.00,0.00
+TypeScript,true,171,1980.00,138.00,0.00
 JavaScript,true,109,617.00,39.00,0.00
 Sem linguagem identificada,false,88,129.50,0.00,0.00
 Go,true,77,1961.00,142.00,0.00
-Rust,false,58,2391.00,96.50,0.00
-C++,true,42,1200.00,59.00,0.00
-Java,true,41,946.00,55.00,0.00
-Jupyter Notebook,false,24,78.00,0.00,0.00
+Rust,false,58,2399.00,97.00,0.00
+C++,true,42,1200.50,59.00,0.00
+Java,true,41,948.00,55.00,0.00
+Jupyter Notebook,false,24,78.50,0.00,0.00
 C,false,21,294.00,46.00,0.00
-Shell,true,20,393.00,9.50,0.00
-Ruby,false,13,6281.00,28.00,0.00
+Shell,true,20,395.00,9.50,0.00
+Ruby,false,13,6288.00,28.00,0.00
 HTML,false,11,232.00,0.00,0.00
-Swift,false,10,705.00,38.50,0.00
+Swift,false,10,705.50,38.50,0.00
 Kotlin,false,9,258.00,75.00,0.00
-C#,true,8,3132.00,127.00,0.00
+C#,true,8,3132.50,127.00,0.00
 CSS,false,8,185.50,2.00,0.00
 Dart,false,6,593.00,35.50,0.00
 Vue,false,6,402.00,40.50,0.00
 Markdown,false,5,244.00,0.00,0.00
 MDX,false,4,380.00,1.00,0.00
-Clojure,false,4,5190.00,119.00,0.00
-PHP,true,4,10684.00,579.50,0.00
+Clojure,false,4,5196.00,119.50,0.00
+PHP,true,4,10687.00,580.50,0.00
 Vim Script,false,3,440.00,8.00,0.00
-Zig,false,3,4559.00,20.00,0.00
+Zig,false,3,4563.00,20.00,0.00
 Dockerfile,false,2,383.50,0.50,0.00
 Scala,false,2,5.00,0.00,0.00
 PowerShell,false,2,803.00,42.00,0.00
@@ -36,10 +36,11 @@ Blade,false,1,1710.00,228.00,0.00
 Roff,false,1,1.00,0.00,0.00
 Assembly,false,1,0.00,0.00,0.00
 Nunjucks,false,1,485.00,0.00,0.00
-Julia,false,1,27835.00,203.00,0.00
+Julia,false,1,27842.00,203.00,0.00
 Lua,false,1,6532.00,147.00,0.00
 Svelte,false,1,252.00,0.00,0.00
-LLVM,false,1,98253.00,160.00,0.00
-V,false,1,13829.00,304.00,0.00
+LLVM,false,1,98387.00,160.00,0.00
+V,false,1,13846.00,304.00,0.00
 Elixir,false,1,898.00,12.00,0.00
-Objective-C,false,1,710.00,40.00,2.00
+Objective-C,false,1,710.00,40.00,3.00
+Fluent,false,1,491.00,42.00,0.00

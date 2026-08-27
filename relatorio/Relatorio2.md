@@ -64,14 +64,16 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 * **Por que relevante:** robustez e reprodutibilidade da coleta — um experimento não deveria quebrar (nem custar rate limit) por causa de uma falha de rede no meio da mineração.
 * **Onde aparece:** `MineradorGitHub.java`, `data/cache/`, `data/analise/cache_stats.csv`, seções Resultados/Discussão e Conclusão.
 
-> **Números de demonstração (cache):** abaixo os valores observados em uma execução de verificação com o cache já populado (substituir pelos valores reais em `data/analise/cache_stats.csv` após rodar `java MineradorGitHub --refresh` e depois `java MineradorGitHub`, se desejado):
+> **Série real de execuções (`data/analise/cache_stats.csv`, acumulada por execução):**
 >
 > | Execução | Modo | Páginas | Cache | Rede | % hit | Requests economizados |
 > |---|---|---|---|---|---|---|
-> | 1ª (popular cache) | refresh | 100 | 0 | 100 | 0% | 0 |
-> | 2ª em diante | cache | 100 | 100 | 0 | 100% | ~100 |
+> | 18:22 (população) | refresh | 100 | 0 | 100 | 0% | 0 |
+> | 18:41 (reuso) | cache | 100 | 100 | 0 | 100% | 100 |
 >
-> Em uma re-execução típica, os ~100 requests de rede deixam de caber na conta: a coleta passa de **≈100 chamadas de rede** para **0**, retomando instantaneamente das páginas salvas.
+> Na primeira execução (`--refresh`), o cache estava vazio: as 100 páginas vieram da rede (0% hit) e ficaram gravadas em `data/cache/`. Na execução seguinte (`java MineradorGitHub`, sem flag), **todas as 100 páginas foram servidas do cache** — **100% de hit** e **100 chamadas à API economizadas**, sem gastar *rate limit* nem tempo de rede. Isso materializa, com números medidos, os três efeitos do cache: retomada, reuso e economia de chamadas.
+>
+> *Nota sobre o campo `estimatedTimeSavedSec`: ficou 0,0 nas linhas porque a estimativa usa a latência média das chamadas de rede **da própria execução**; nas execuções 100% em cache não há chamada de rede que sirva de base. A métrica efetiva de economia é o nº de **requests economizados** (100 na linha de reuso).*
 
 **Ameaça à validade do cache (controle):** o cache é *staleness-by-design* — reutilizá-lo mantém os dados da última coleta real. O `--refresh` é o mecanismo de controle para revalidar quando se quer dados novos (ex.: antes da correção). Como os `endCursor` do GitHub são estáveis dentro do resultado ordenado por estrelas, a retomada é consistente; se o ranking mudar entre execuções, uma re-coleta com `--refresh` resolve.
 
@@ -84,10 +86,10 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 | Métrica Estatística | RQ01: Idade (anos) | RQ02: PRs Aceitas | RQ03: Releases | RQ04: Dias desde atualização |
 | :--- | :---: | :---: | :---: | :---: |
 | **Mediana** | **7,72** | **773,5** | **41** | **0** |
-| Mínimo | 0,04 (13 dias) | 0 | 0 | 0 |
+| Mínimo | 0,04 (14 dias) | 0 | 0 | 0 |
 | 1º Quartil (Q1) | 3,46 (1.265 dias) | 175 | 0 | 0 |
-| 3º Quartil (Q3) | 11,35 (4.145 dias) | 3.433 | 150 | 0 |
-| Máximo | 18,38 (6.711 dias) | 103.684 | 1.000 | 2 |
+| 3º Quartil (Q3) | 11,34 (4.143 dias) | 3.439 | 150 | 0 |
+| Máximo | 18,38 (6.712 dias) | 103.737 | 1.000 | 3 |
 
 > Conversões de dias para anos: idade em anos = dias / 365,25.
 
@@ -100,8 +102,8 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 **Metodologia e definição da métrica:** idade do repositório a partir de `createdAt`, em relação a `collectedAt`.
 
 **Resultados (N = 1.000):**
-* **Mediana: 7,72 anos** (≈2.819 dias); Q1 ≈ 3,46 anos; Q3 ≈ 11,35 anos.
-* Intervalo: de 13 dias (repositório mais novo) a 6.711 dias (≈18,4 anos).
+* **Mediana: 7,72 anos** (≈2.818,5 dias); Q1 ≈ 3,46 anos; Q3 ≈ 11,34 anos.
+* Intervalo: de 14 dias (repositório mais novo) a 6.712 dias (≈18,4 anos).
 
 **Discussão (hipótese vs. resultado):** a hipótese foi **confirmada**. A mediana de quase 8 anos mostra que o topo do GitHub é dominado por projetos veteranos. Há uma cauda inferior de projetos recentes (menos de 1 ano), tipicamente impulsionados por picos de interesse (ex.: ferramentas de IA generativa), mas ela não desloca a concentração em projetos maduros.
 
@@ -114,8 +116,8 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 **Metodologia e definição da métrica:** total de pull requests aceitas (`states: MERGED`).
 
 **Resultados (N = 1.000):**
-* **Mediana: 773,5 PRs aceitas;** Q1 = 175; Q3 = 3.433.
-* Intervalo: de 0 a **103.684** PRs (máximo).
+* **Mediana: 773,5 PRs aceitas;** Q1 = 175; Q3 = 3.439.
+* Intervalo: de 0 a **103.737** PRs (máximo).
 
 **Discussão (hipótese vs. resultado):** a hipótese foi **confirmada**. A mediana de ~774 PRs comprova alta abertura comunitária na maioria dos projetos populares. Assim como observado na amostra de 100 (referência `Respostas.md`), valores 0 ou baixos aparecem principalmente em casos de **governança fora do GitHub** (ex.: fluxo por mailing lists / Gerrit em projetos como Linux e Go), em que o repositório no GitHub funciona como *mirror* — e não significam ausência de contribuição.
 
@@ -144,9 +146,9 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 **Metodologia e definição da métrica:** tempo (em dias) de `updatedAt` até `collectedAt`.
 
 **Resultados (N = 1.000):**
-* **Mediana: 0 dias** desde a última atualização; máximo de 2 dias em toda a amostra.
+* **Mediana: 0 dias** desde a última atualização; máximo de 3 dias em toda a amostra.
 
-**Discussão (hipótese vs. resultado):** a hipótese foi **fortemente confirmada**. Todos os 1.000 repositórios foram atualizados em até 2 dias da coleta (maioria no mesmo dia). Popularidade e atualização frequente andam juntas — é praticamente impossível se manter no topo de estrelas estando desatualizado.
+**Discussão (hipótese vs. resultado):** a hipótese foi **fortemente confirmada**. Todos os 1.000 repositórios foram atualizados em até 3 dias da coleta (maioria no mesmo dia). Popularidade e atualização frequente andam juntas — é praticamente impossível se manter no topo de estrelas estando desatualizado.
 
 ---
 
@@ -157,8 +159,8 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 **Metodologia e definição da métrica:** linguagem primária (`primaryLanguage.name`) de cada repositório, comparada ao conjunto do Octoverse 2025 (TypeScript, Python, JavaScript, Java, C#, PHP, Shell, C++, HCL, Go).
 
 **Resultados (N = 1.000):**
-* **70,10%** dos repositórios usam uma linguagem considerada popular.
-* Ranking das linguagens mais presentes: **Python 228**, TypeScript 172, JavaScript 109, Go 77, C++ 42, Java 41, Shell 20, C# 8, PHP 4. (88 repositórios sem linguagem identificada, ex.: listas/Markdown.)
+* **70,00%** dos repositórios usam uma linguagem considerada popular.
+* Ranking das linguagens mais presentes: **Python 228**, TypeScript 171, JavaScript 109, Go 77, C++ 42, Java 41, Shell 20, C# 8, PHP 4. (88 repositórios sem linguagem identificada, ex.: listas/Markdown.)
 
 **Discussão (hipótese vs. resultado):** a hipótese foi **confirmada**. Mais de 2/3 da amostra está concentrado em linguagens do topo do ranking global, com Python, TypeScript e JavaScript dominando — coerente com a preferência da comunidade e com a forte presença de projetos de web/IA. O restante (≈30%) usa linguagens fora do "topo" (ex.: Rust, Ruby, Kotlin, C), que ainda assim podem ser muito relevantes em nichos.
 
@@ -171,7 +173,7 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 **Metodologia e definição da métrica:** razão `issues fechadas / total de issues` por repositório (repositórios sem issues excluídos).
 
 **Resultados (N = 1.000; 956 com issues):**
-* **% de issues fechadas — mediana: 87,58%.**
+* **% de issues fechadas — mediana: 87,51%.**
 * 44 repositórios não possuem issues (excluídos do cálculo).
 
 **Discussão (hipótese vs. resultado):** a hipótese foi **confirmada**. A mediana de ~88% de issues fechadas indica boa capacidade de triagem encerrando demandas. A ressalva da hipótese permanece como **limitação**: uma parte desse fechamento pode vir de automação (*stale bots*) e não representar resolução real — uma direção a aprofundar em trabalhos futuros.
@@ -188,15 +190,15 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 
 | Linguagem | Popular | N | PRs (mediana) | Releases (mediana) |
 | :--- | :---: | :---: | :---: | :---: |
-| Python | sim | 228 | 534,5 | 21 |
-| TypeScript | sim | 172 | 1.977 | 134 |
+| Python | sim | 228 | 535,5 | 21 |
+| TypeScript | sim | 171 | 1.980 | 138 |
 | JavaScript | sim | 109 | 617 | 39 |
 | Go | sim | 77 | 1.961 | 142 |
-| C++ | sim | 42 | 1.200 | 59 |
-| Java | sim | 41 | 946 | 55 |
-| PHP | sim | 4 | 10.684 | 579,5 |
-| Rust | não | 58 | 2.391 | 96,5 |
-| Ruby | não | 13 | 6.281 | 28 |
+| C++ | sim | 42 | 1.200,5 | 59 |
+| Java | sim | 41 | 948 | 55 |
+| PHP | sim | 4 | 10.687 | 580,5 |
+| Rust | não | 58 | 2.399 | 97 |
+| Ruby | não | 13 | 6.288 | 28 |
 
 * Atualizações: mediana **0 dias** em praticamente todas as linguagens — todos os repositórios populares, independentemente da linguagem, estão sendo atualizados.
 
@@ -212,10 +214,10 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 
 | Quartil | N | Estrelas (mediana) | PRs / 1.000 estrelas (mediana) | Releases / 1.000 estrelas (mediana) |
 | :---: | :---: | :---: | :---: | :---: |
-| Q1 (menos estrelas) | 251 | 35.689 | **14,13** | 1,15 |
-| Q2 | 250 | 43.270 | **18,55** | 1,19 |
-| Q3 | 250 | 58.723 | **15,14** | 0,75 |
-| Q4 (mais estrelas) | 249 | 100.712 | **8,35** | 0,25 |
+| Q1 (menos estrelas) | 251 | 35.693 | **14,12** | 1,15 |
+| Q2 | 250 | 43.282,5 | **18,73** | 1,19 |
+| Q3 | 250 | 58.775,5 | **15,01** | 0,75 |
+| Q4 (mais estrelas) | 249 | 101.005 | **8,35** | 0,25 |
 
 **Discussão (hipótese vs. resultado):** a hipótese foi **confirmada no topo**. O quartil mais estrelado (Q4, mediana ≈ 100 mil estrelas) tem a **menor** taxa de PRs por mil estrelas (8,35) e a **menor** taxa de releases por mil estrelas (0,25) — o engajamento cresce mais devagar que a popularidade. O padrão não é monotônico (Q2 é o pico), mas a queda acentuada entre Q2/Q3 e Q4 sustenta a ideia de que, no extremo da popularidade, as estrelas crescem mais rápido do que a contribuição efetiva.
 
@@ -243,10 +245,10 @@ Os dados dos 1.000 repositórios mais populares do GitHub **confirmam, em sua ma
 
 As **inovações** cumpriram seu papel de contribuição original medindo algo fora do enunciado:
 * **RQ08** mostrou, de forma quantificável, que **engajamento não cresce proporcionalmente à popularidade** — no quartil mais estrelado, a taxa de PRs/releases por mil estrelas cai de forma acentuada, dando suporte à ideia de que estrela é, em grande parte, "reconhecimento passivo".
-* **Cache local** trouxe robustez e reprodutibilidade à coleta: retomada de execuções interrompidas, economia de *rate limit* e tempo, e métricas de eficiência registradas em `cache_stats.csv` — com a devida ressalva de *staleness* controlada pela flag `--refresh`.
+* **Cache local** trouxe robustez e reprodutibilidade à coleta: retomada de execuções interrompidas e economia de *rate limit* — medida em execução real, com **100% de hit e 100 chamadas à API economizadas** no reuso (série em `cache_stats.csv`) — com a devida ressalva de *staleness* controlada pela flag `--refresh`.
 
 Em conjunto, o laboratório cumpriu as 7 RQs do enunciado, agregou duas frentes de inovação com resultado discutido e registrou o processo completo no GitHub Projects.
 
 ---
 
-*Documento gerado a partir dos dados em `data/analise/` e das coletas em `data/repositorios.csv`. Números de cache marcados como demonstração devem ser confirmados em `data/analise/cache_stats.csv`.*
+*Documento gerado a partir dos dados em `data/analise/` e das coletas em `data/repositorios.csv`. A série de métricas do cache está em `data/analise/cache_stats.csv` (acumulada por execução).*

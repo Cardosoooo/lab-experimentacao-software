@@ -1,9 +1,9 @@
 rq,metrica,valor,n
-RQ01,idade_mediana_dias,2819.00,1000
+RQ01,idade_mediana_dias,2818.50,1000
 RQ01,idade_mediana_anos,7.72,1000
 RQ02,pull_requests_aceitas_mediana,773.50,1000
 RQ03,releases_mediana,41.00,1000
 RQ04,dias_desde_atualizacao_mediana,0.00,1000
-RQ05,repositorios_em_linguagem_popular_pct,70.10,1000
-RQ06,pct_issues_fechadas_mediana,87.58,956
+RQ05,repositorios_em_linguagem_popular_pct,70.00,1000
+RQ06,pct_issues_fechadas_mediana,87.51,956
 RQ06,repositorios_sem_issues,44,1000

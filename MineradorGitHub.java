@@ -192,26 +192,35 @@ public class MineradorGitHub {
         Files.createDirectories(dir);
         Path file = dir.resolve("cache_stats.csv");
 
-        boolean exists = Files.exists(file);
         List<String> header = List.of(
                 "executedAt", "mode", "pagesTotal", "cacheHits", "cacheMisses",
                 "hitPct", "requestsSaved", "estimatedTimeSavedSec"
         );
+        String headerLine = String.join(",", header);
 
-        StringBuilder sb = new StringBuilder();
-        if (!exists) {
-            sb.append(String.join(",", header)).append("\n");
+        String row = GitHubGraphQL.csvField(collectedAt) + ","
+                + mode + ","
+                + (stats.cacheHits + stats.cacheMisses) + ","
+                + stats.cacheHits + ","
+                + stats.cacheMisses + ","
+                + String.format(java.util.Locale.ROOT, "%.1f", stats.hitPct()) + ","
+                + stats.cacheHits + ","
+                + String.format(java.util.Locale.ROOT, "%.1f", stats.estimatedTimeSavedSeconds()) + "\n";
+
+        String content;
+        if (Files.exists(file)) {
+            // A SERIE e acumulada: uma linha por execucao, preservando as anteriores (base
+            // p/ Labs 04/05). Se o arquivo antigo perdeu o cabecalho (escrito por versoes
+            // que sobrescreviam), restaura o cabecalho mantendo as linhas de dados.
+            content = Files.readString(file, StandardCharsets.UTF_8);
+            if (!content.startsWith(headerLine)) {
+                content = headerLine + "\n" + content;
+            }
+            content += row;
+        } else {
+            content = headerLine + "\n" + row;
         }
-        sb.append(GitHubGraphQL.csvField(collectedAt)).append(",")
-                .append(mode).append(",")
-                .append(stats.cacheHits + stats.cacheMisses).append(",")
-                .append(stats.cacheHits).append(",")
-                .append(stats.cacheMisses).append(",")
-                .append(String.format(java.util.Locale.ROOT, "%.1f", stats.hitPct())).append(",")
-                .append(stats.cacheHits).append(",")
-                .append(String.format(java.util.Locale.ROOT, "%.1f", stats.estimatedTimeSavedSeconds())).append("\n");
-
-        Files.writeString(file, sb.toString(), StandardCharsets.UTF_8);
+        Files.writeString(file, content, StandardCharsets.UTF_8);
     }
 
     private static final class CacheStats {
