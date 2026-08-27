@@ -26,14 +26,16 @@ A definição de métrica e o campo coletado para cada RQ estão na seção [Map
 
 ```
 lab-experimentacao-software/
-├── MineradorGitHub.java        # coleta os 1000 repositórios via GraphQL (RQ01-RQ07)
+├── MineradorGitHub.java        # coleta os 1000 repositórios via GraphQL (RQ01-RQ07 + RQ08)
 ├── ExportadorKanban.java       # snapshot do board GitHub Projects (v2) em CSV
+├── AnalisadorRQs.java          # calcula as métricas das RQ01-RQ08 a partir do CSV coletado
 ├── GitHubGraphQL.java          # utilitário compartilhado: HTTP/retry, parser JSON e helpers de CSV
 ├── Testes.java                 # testes automatizados desses utilitários (sem framework externo)
 ├── data/
 │   ├── repositorios.csv        # dataset principal: 1000 repositórios, uma linha por repositório
 │   ├── repositorios_raw.json   # resposta bruta da API (auditoria/debug)
-│   └── snapshots/              # um CSV por execução do ExportadorKanban (kanban_<data>.csv)
+│   ├── snapshots/              # um CSV por execução do ExportadorKanban (kanban_<data>.csv)
+│   └── analise/                # saída do AnalisadorRQs: resumo.csv, por_linguagem.csv, rq08_estrelas_engajamento.csv
 ├── relatorio/
 │   └── introducao_rascunho.md  # rascunho da Introdução do relatório final (hipóteses informais)
 ├── .gitignore
@@ -85,6 +87,12 @@ Snapshot do Kanban (rodar de novo a cada semana/aula, conforme exigido no proces
 java ExportadorKanban
 ```
 
+Análise das RQ01–RQ08 (lê o `repositorios.csv` já coletado, não faz chamada de rede):
+
+```bash
+java AnalisadorRQs
+```
+
 Testes automatizados:
 
 ```bash
@@ -96,6 +104,7 @@ Saída salva automaticamente em:
 - `data/repositorios_raw.json` — resposta bruta da API
 - `data/repositorios.csv` — 1000 repositórios, com `collectedAt` (data/hora da coleta) em cada linha
 - `data/snapshots/kanban_<data>.csv` — estado do board na data da execução; a série completa desses arquivos é a base de dados usada nos Labs 04/05
+- `data/analise/resumo.csv`, `por_linguagem.csv`, `rq08_estrelas_engajamento.csv` — métricas calculadas para as RQ01–RQ08
 
 ## Mapeamento das Questões de Pesquisa
 
@@ -113,9 +122,17 @@ RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de i
 
 **Fonte de referência para "linguagens mais populares" (RQ05/RQ07):** [GitHub Octoverse 2025](https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/), ranking por número de contribuidores. Consideradas populares: TypeScript, Python, JavaScript, Java, C#, PHP, Shell, C++, HCL e Go. Referência fixa para o laboratório inteiro — não muda entre sprints.
 
+## RQ de inovação (30% da nota — proposta pelo grupo, fora do enunciado)
+
+**RQ08** — Dentro dos 1000 repositórios mais populares, quem tem mais estrelas recebe contribuição proporcionalmente maior, ou o engajamento cresce mais devagar que a popularidade?
+
+- **Métrica:** PRs aceitas por mil estrelas e releases por mil estrelas, comparados entre quartis de estrelas dentro da amostra (`stargazerCount`, campo novo — antes só usávamos estrelas pra ordenar o ranking, nunca guardávamos o número).
+- **Hipótese informal:** a relação não é proporcional — repositórios hiper-populares devem ter uma taxa de PRs/releases por estrela **menor**, porque dar estrela é um clique sem custo e contribuir exige trabalho de verdade.
+- Detalhada em [relatorio/introducao_rascunho.md](relatorio/introducao_rascunho.md), calculada por `AnalisadorRQs.java` em `data/analise/rq08_estrelas_engajamento.csv`.
+
 ## Testes automatizados
 
-`Testes.java` cobre os utilitários de `GitHubGraphQL.java` (parser JSON, escape de JSON/CSV) e os helpers específicos de cada script (`MineradorGitHub.totalCount`, `ExportadorKanban.assigneeLogins`), sem depender de rede — os testes usam JSON de exemplo, não fazem chamada real à API. Não usa JUnit nem nenhum framework: só `System.exit(1)` se algo falhar, o suficiente para o tamanho do projeto e consistente com a regra de não usar bibliotecas de terceiros.
+`Testes.java` cobre os utilitários de `GitHubGraphQL.java` (parser JSON, escape/parse de JSON e CSV) e os helpers específicos de cada script (`MineradorGitHub.totalCount`, `ExportadorKanban.assigneeLogins`, `AnalisadorRQs.mediana`/`quartil`), sem depender de rede — usam dados de exemplo, não fazem chamada real à API. Não usa JUnit nem nenhum framework: só `System.exit(1)` se algo falhar, o suficiente para o tamanho do projeto e consistente com a regra de não usar bibliotecas de terceiros.
 
 ## Restrições do enunciado
 
@@ -133,5 +150,5 @@ RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de i
 
 - **Lab01S01** ✅: consulta para 100 repositórios + GitHub Projects criado.
 - **Lab01S02** ✅: paginação para 1000 repositórios, dados em `.csv`, primeira versão do relatório com hipóteses informais, snapshot do board exportado.
-- **Lab01S03** (próxima): análise e visualização de dados para as 7 RQs.
+- **Lab01S03** (em andamento): métricas calculadas para as 7 RQs + RQ08 (inovação) ✅ — falta a visualização gráfica.
 - **Relatório Final**: documento consolidado com introdução, metodologia, resultados, discussão e seção de configuração do processo.

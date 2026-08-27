@@ -99,6 +99,7 @@ public class MineradorGitHub {
                     releases { totalCount }
                     totalIssues: issues { totalCount }
                     closedIssues: issues(states: CLOSED) { totalCount }
+                    stargazerCount
                   }
                 }
               }
@@ -107,12 +108,15 @@ public class MineradorGitHub {
         // nameWithOwner + createdAt -> RQ01 | pullRequests -> RQ02 | releases -> RQ03
         // updatedAt -> RQ04 | primaryLanguage -> RQ05 | totalIssues/closedIssues -> RQ06
         // RQ07 e derivada de RQ02+RQ03+RQ04 agrupadas por linguagem, sem campo proprio.
+        // stargazerCount -> RQ08: so usavamos estrelas pra ordenar o ranking, nunca
+        // guardavamos o numero em si.
     }
 
     private static void saveCsv(List<Map<String, Object>> nodes, String collectedAt) throws IOException {
         List<String> header = List.of(
                 "nameWithOwner", "createdAt", "updatedAt", "primaryLanguage",
-                "mergedPullRequests", "releases", "totalIssues", "closedIssues", "collectedAt"
+                "mergedPullRequests", "releases", "totalIssues", "closedIssues", "collectedAt",
+                "stargazerCount"
         );
         StringBuilder csv = new StringBuilder(String.join(",", header)).append("\n");
 
@@ -128,7 +132,8 @@ public class MineradorGitHub {
                     .append(totalCount(node.get("releases"))).append(",")
                     .append(totalCount(node.get("totalIssues"))).append(",")
                     .append(totalCount(node.get("closedIssues"))).append(",")
-                    .append(GitHubGraphQL.csvField(collectedAt)).append("\n");
+                    .append(GitHubGraphQL.csvField(collectedAt)).append(",")
+                    .append(GitHubGraphQL.str(node.get("stargazerCount"))).append("\n");
         }
 
         Files.writeString(Path.of(OUTPUT_DIR, "repositorios.csv"), csv.toString(), StandardCharsets.UTF_8);

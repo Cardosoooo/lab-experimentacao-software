@@ -43,4 +43,15 @@ issues) realmente sustentam essa fama de "maduro e bem cuidado".
 
 ## RQs / métricas de inovação (30%)
 
-`[a definir]`
+- **RQ08** — Dentro dos 1000 repositórios mais populares, quem tem mais estrelas
+  recebe contribuição proporcionalmente maior, ou o engajamento cresce mais devagar
+  que a popularidade?
+  Métrica: PRs aceitas por mil estrelas e releases por mil estrelas, comparados entre
+  quartis de estrelas dentro da amostra.
+  Hipótese: não, a relação não é proporcional — repositórios hiper-populares (mais
+  estrelas) devem ter uma taxa de PRs/releases por estrela **menor** que repositórios
+  apenas moderadamente populares dentro da amostra. Dar estrela é um clique sem
+  custo; contribuir com um PR exige trabalho de verdade, então esperamos que estrela
+  funcione mais como "reconhecimento passivo" do que como sinal real de engajamento.
+  Limitação: a comparação é relativa à amostra (já são os mais populares do GitHub
+  inteiro) — mesmo o quartil "menos estrelado" ainda é extremamente popular.
