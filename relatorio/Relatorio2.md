@@ -2,7 +2,7 @@
 
 **Título:** Características de repositórios populares do GitHub + Setup do Kanban
 **Disciplina:** Laboratório de Experimentação de Software 
-**Integrante:** Gabriel Cardoso ([@Cardosoooo](https://github.com/Cardosoooo)) Guilherme Martini 
+**Integrantes:** Gabriel Cardoso ([@Cardosoooo](https://github.com/Cardosoooo)) e Guilherme Martini Brina Ferreira ([@Gmbferreira](https://github.com/Gmbferreira))
 **Repositório:** https://github.com/Cardosoooo/lab-experimentacao-software
 
 ---
@@ -233,7 +233,7 @@ O quadro Kanban acompanhou todo o laboratório e serviu de base de dados para o 
 * **GitHub Projects (v2):** [Kanban Sprint 1](https://github.com/users/Cardosoooo/projects/2)
 * **Colunas do board (campo Status):** `Backlog → To Do → Doing → Review → Done`.
 * **Cartões = Issues do repositório**, adicionadas ao Project e **atribuídas a um responsável** (campo Assignee), rastreáveis pela API.
-* **Limite de WIP (Doing): 1.** O grupo é composto por 1 integrante, portanto só é possível codificar uma Issue por vez; WIP=1 força fechar (ou mover para Review) o item atual antes de iniciar outro, evitando trabalho pela metade acumulado na coluna.
+* **Limite de WIP (Doing): 2.** O grupo é composto por 2 integrantes, portanto o limite segue a sugestão do processo da disciplina (1 cartão por pessoa ativa no board): WIP=2 permite que cada integrante tenha até uma Issue em andamento, evitando mais de uma Issue por pessoa acumulada na coluna Doing.
 * **Vínculo commit ↔ Issue:** todo commit referencia o número da Issue (ex.: `#6 pagina consulta para 1000 repositorios`), garantindo vínculo automático no histórico e contabilização correta na avaliação.
 * **Snapshots de sprint:** ao fim de cada sprint, o `ExportadorKanban.java` exporta o estado do board (Status, Assignee) para um CSV em `data/snapshots/kanban_<data>.csv`. Como o GitHub Projects não guarda histórico consultável de mudança de coluna, essa série de snapshots faz esse papel e será a base dos Labs 04/05.
 
