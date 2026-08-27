@@ -2,9 +2,10 @@
 
 Projeto da disciplina **Laboratório de Experimentação de Software** (Engenharia de Software, PUC Minas). Investiga, com dados, se os 1000 repositórios com mais estrelas do GitHub sustentam a fama de "maduros e bem cuidados" que costuma ser atribuída a projetos populares e acompanha, em paralelo, o processo do próprio laboratório num quadro Kanban (GitHub Projects v2).
 
-## Integrante
+## Integrantes
 
 - Gabriel Cardoso ([@Cardosoooo](https://github.com/Cardosoooo))
+- Guilherme Brina Ferreira ([@Gmbferreira](https://github.com/Gmbferreira))
 
 ## O que o projeto analisa
 
@@ -179,7 +180,7 @@ Abra qualquer um dos dois arquivos direto no navegador (não precisa de servidor
 - **Repositório:** https://github.com/Cardosoooo/lab-experimentacao-software
 - **GitHub Projects:** [Kanban Sprint 1](https://github.com/users/Cardosoooo/projects/2)
 - **Colunas (Status):** `Backlog → To Do → Doing → Review → Done`
-- **Limite de WIP (Doing): 1.** O grupo é composto por 1 integrante (Gabriel Cardoso), então só é possível codificar uma Issue por vez — WIP=1 força fechar (ou mover para Review) o item atual antes de iniciar outro, evitando trabalho pela metade acumulado na coluna.
+- **Limite de WIP (Doing): 2.** O grupo passou a ter 2 integrantes (Gabriel Cardoso e Guilherme Brina Ferreira) — WIP=2 segue a sugestão do processo da disciplina (1 cartão por pessoa ativa no board), evitando que mais de uma Issue por integrante fique em andamento ao mesmo tempo.
 
 ## Roadmap das sprints
 
