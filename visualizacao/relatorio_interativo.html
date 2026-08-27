@@ -1,0 +1,589 @@
+<title>StarMiner Insights</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:        #f9f9f7;
+    --surface-1:   #fcfcfb;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:        #e1e0d9;
+    --baseline:    #c3c2b7;
+    --border:      rgba(11,11,11,0.10);
+    --track:       #e9edf5;
+
+    --blue:    #2a78d6;
+    --blue-soft: #cde2fb;
+    --orange:  #eb6834;
+    --aqua:    #1baf7a;
+    --yellow:  #eda100;
+    --magenta: #e87ba4;
+    --green:   #008300;
+    --violet:  #4a3aa7;
+    --red:     #e34948;
+
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface-1: #1a1a19;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255,255,255,0.10);
+      --track: #22314a;
+      --blue: #3987e5;
+      --orange: #d95926;
+      --aqua: #199e70;
+      --yellow: #c98500;
+      --magenta: #d55181;
+      --green: #0ca30c;
+      --violet: #9085e9;
+      --red: #e66767;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255,255,255,0.10);
+    --track: #22314a;
+    --blue: #3987e5;
+    --orange: #d95926;
+    --aqua: #199e70;
+    --yellow: #c98500;
+    --magenta: #d55181;
+    --green: #0ca30c;
+    --violet: #9085e9;
+    --red: #e66767;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font-family: var(--font);
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: clamp(24px, 5vw, 56px) 20px 90px; }
+
+  header.top { padding-bottom: 28px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+  .eyebrow {
+    font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--blue);
+  }
+  h1 { font-size: clamp(28px, 4vw, 36px); margin: 8px 0 10px; text-wrap: balance; letter-spacing: -0.01em; }
+  .dek { font-size: 16px; line-height: 1.6; color: var(--text-secondary); max-width: 62ch; margin: 0 0 16px; }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--text-muted);
+  }
+  .meta-row a { color: var(--blue); text-decoration: none; }
+  .meta-row a:hover { text-decoration: underline; }
+
+  nav.toc {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin: 24px 0 0;
+  }
+  nav.toc a {
+    font-size: 12.5px; color: var(--text-secondary); text-decoration: none;
+    padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border);
+  }
+  nav.toc a:hover { border-color: var(--blue); color: var(--blue); }
+
+  section.rq { padding: 40px 0; border-bottom: 1px solid var(--border); scroll-margin-top: 20px; }
+  section.rq:last-of-type { border-bottom: none; }
+  .rq-id {
+    font-size: 12.5px; font-weight: 700; letter-spacing: 0.05em; color: var(--text-muted);
+  }
+  .rq-question { font-size: clamp(19px, 2.6vw, 23px); font-weight: 600; margin: 6px 0 14px; text-wrap: balance; }
+  .rq-finding {
+    font-size: 15px; line-height: 1.65; color: var(--text-secondary); max-width: 68ch; margin: 0 0 22px;
+  }
+  .rq-finding b { color: var(--text-primary); font-weight: 600; }
+
+  .chart-card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 20px clamp(12px, 3vw, 26px) 16px;
+  }
+  .chart-card svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .chart-title { font-size: 12.5px; font-weight: 600; color: var(--text-secondary); margin: 0 0 14px; }
+
+  text { font-family: var(--font); }
+  .bar-fill { fill: var(--blue); }
+  .bar-label { font-size: 12.5px; fill: var(--text-secondary); }
+  .bar-value { font-size: 12.5px; font-weight: 600; fill: var(--text-primary); font-variant-numeric: tabular-nums; }
+  .axis-tick { font-size: 11px; fill: var(--text-muted); }
+  .axis-line { stroke: var(--baseline); stroke-width: 1; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .box-fill { fill: var(--blue); fill-opacity: 0.16; stroke: var(--blue); stroke-width: 1.5; }
+  .box-median { stroke: var(--blue); stroke-width: 2.5; }
+  .box-whisker { stroke: var(--baseline); stroke-width: 1.5; }
+  .box-cap { stroke: var(--baseline); stroke-width: 1.5; }
+  .legend-swatch { }
+  .legend-item { font-size: 12.5px; fill: var(--text-secondary); }
+
+  details.table-toggle { margin-top: 14px; }
+  details.table-toggle summary {
+    font-size: 12.5px; color: var(--text-muted); cursor: pointer; user-select: none;
+  }
+  details.table-toggle table {
+    width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  details.table-toggle th, details.table-toggle td {
+    text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); color: var(--text-secondary);
+  }
+  details.table-toggle th { color: var(--text-muted); font-weight: 600; }
+  details.table-toggle td:not(:first-child), details.table-toggle th:not(:first-child) { text-align: right; }
+
+  .stat-callout {
+    display: flex; flex-wrap: wrap; gap: 28px; align-items: baseline;
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 22px 24px;
+  }
+  .stat-callout .num { font-size: 44px; font-weight: 700; line-height: 1; color: var(--blue); }
+  .stat-callout .num-label { font-size: 13px; color: var(--text-muted); margin-top: 6px; max-width: 20ch; }
+  .stat-callout .side { font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; max-width: 40ch; }
+
+  .meter-wrap { }
+  .meter-track { fill: var(--track); }
+  .meter-fill { fill: var(--blue); }
+
+  .caption { font-size: 12.5px; color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
+
+  footer.end {
+    margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border);
+    font-size: 12.5px; color: var(--text-muted); line-height: 1.7;
+  }
+  footer.end a { color: var(--blue); text-decoration: none; }
+  footer.end a:hover { text-decoration: underline; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .chart-card { transition: border-color 0.15s ease; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">Lab01S03 — Análise e visualização</p>
+    <h1>Repositórios populares sustentam a própria fama?</h1>
+    <p class="dek">Métricas calculadas sobre os 1000 repositórios com mais estrelas do GitHub, coletados em 2026‑08‑26, para as 7 Questões de Pesquisa do enunciado e uma questão adicional proposta pelo grupo (RQ08).</p>
+    <div class="meta-row">
+      <span>Gabriel Cardoso</span>
+      <span>n = 1000 repositórios</span>
+      <span><a href="https://github.com/Cardosoooo/lab-experimentacao-software" target="_blank" rel="noopener">github.com/Cardosoooo/lab-experimentacao-software</a></span>
+    </div>
+    <nav class="toc" id="toc"></nav>
+  </header>
+
+  <section class="rq" id="rq01">
+    <p class="rq-id">RQ01</p>
+    <h2 class="rq-question">Sistemas populares são maduros/antigos?</h2>
+    <p class="rq-finding"><b>Sim.</b> Idade mediana de <b>7,7 anos</b> — metade da amostra tem mais tempo de existência que isso. O repositório mais novo tem só 13 dias; o mais antigo, 18,4 anos.</p>
+    <div class="chart-card">
+      <p class="chart-title">Distribuição da idade dos repositórios (anos)</p>
+      <div id="chart-rq01"></div>
+    </div>
+    <details class="table-toggle">
+      <summary>Ver como tabela</summary>
+      <table>
+        <thead><tr><th>Mínimo</th><th>P25</th><th>Mediana</th><th>P75</th><th>Máximo</th></tr></thead>
+        <tbody><tr><td>0,0 anos</td><td>3,5 anos</td><td>7,7 anos</td><td>11,3 anos</td><td>18,4 anos</td></tr></tbody>
+      </table>
+    </details>
+  </section>
+
+  <section class="rq" id="rq02">
+    <p class="rq-id">RQ02</p>
+    <h2 class="rq-question">Sistemas populares recebem muita contribuição externa?</h2>
+    <p class="rq-finding"><b>Sim, e de forma bem desigual.</b> Mediana de <b>773 PRs aceitas</b>, mas a distribuição é extremamente assimétrica — 25% dos repositórios têm mais de 3.433 PRs aceitas, e o topo da amostra chega a 103.684 (escala logarítmica abaixo, senão a caixa desaparece ao lado desse extremo).</p>
+    <div class="chart-card">
+      <p class="chart-title">PRs aceitas por repositório (escala logarítmica)</p>
+      <div id="chart-rq02"></div>
+    </div>
+    <details class="table-toggle">
+      <summary>Ver como tabela</summary>
+      <table>
+        <thead><tr><th>Mínimo</th><th>P25</th><th>Mediana</th><th>P75</th><th>Máximo</th></tr></thead>
+        <tbody><tr><td>0</td><td>175</td><td>773,5</td><td>3.433</td><td>103.684</td></tr></tbody>
+      </table>
+    </details>
+  </section>
+
+  <section class="rq" id="rq03">
+    <p class="rq-id">RQ03</p>
+    <h2 class="rq-question">Sistemas populares lançam releases com frequência?</h2>
+    <p class="rq-finding"><b>Parcialmente.</b> Mediana de <b>41 releases</b>, mas 25% da amostra não tem nenhuma release registrada (times que fazem deploy contínuo sem versionar via GitHub Releases, por exemplo) — "popular" não implica necessariamente um processo formal de releases.</p>
+    <div class="chart-card">
+      <p class="chart-title">Releases por repositório (escala logarítmica)</p>
+      <div id="chart-rq03"></div>
+    </div>
+    <details class="table-toggle">
+      <summary>Ver como tabela</summary>
+      <table>
+        <thead><tr><th>Mínimo</th><th>P25</th><th>Mediana</th><th>P75</th><th>Máximo</th></tr></thead>
+        <tbody><tr><td>0</td><td>0</td><td>41</td><td>150</td><td>1.000</td></tr></tbody>
+      </table>
+    </details>
+  </section>
+
+  <section class="rq" id="rq04">
+    <p class="rq-id">RQ04</p>
+    <h2 class="rq-question">Sistemas populares são atualizados com frequência?</h2>
+    <p class="rq-finding"><b>Sim, quase sem exceção.</b> A distribuição é tão concentrada que um boxplot não mostraria nada além de uma linha — por isso o destaque abaixo.</p>
+    <div class="stat-callout">
+      <div>
+        <div class="num">0</div>
+        <div class="num-label">dias desde a última atualização (mediana)</div>
+      </div>
+      <div class="side">75% da amostra (750 repositórios) também tem mediana igual a 0 — ou seja, pelo menos 3 em cada 4 repositórios populares receberam algum push no próprio dia da coleta. O caso mais "parado" da amostra inteira ainda assim foi atualizado 2 dias antes.</div>
+    </div>
+  </section>
+
+  <section class="rq" id="rq05">
+    <p class="rq-id">RQ05</p>
+    <h2 class="rq-question">Sistemas populares são escritos nas linguagens mais populares?</h2>
+    <p class="rq-finding"><b>Sim.</b> <b>70,1%</b> da amostra está numa linguagem do ranking <a href="https://github.blog/news-insights/octoverse/octoverse-a-new-developer-joins-github-every-second-as-ai-leads-typescript-to-1/" target="_blank" rel="noopener">GitHub Octoverse 2025</a>. Python lidera com folga, seguido de TypeScript e JavaScript.</p>
+    <div class="chart-card">
+      <p class="chart-title">Repositórios em linguagem popular (Octoverse 2025)</p>
+      <div id="chart-rq05-meter"></div>
+    </div>
+    <div class="chart-card" style="margin-top:14px;">
+      <p class="chart-title">Top 8 linguagens por número de repositórios</p>
+      <div id="chart-rq05-rank"></div>
+    </div>
+  </section>
+
+  <section class="rq" id="rq06">
+    <p class="rq-id">RQ06</p>
+    <h2 class="rq-question">Sistemas populares possuem um alto percentual de issues fechadas?</h2>
+    <p class="rq-finding"><b>Sim.</b> Mediana de <b>87,6%</b> de issues fechadas, entre os 956 repositórios que têm ao menos uma issue. 44 repositórios (4,4%) não têm nenhuma issue registrada e ficaram de fora dessa conta — 0 fechadas de 0 não é 0% nem 100%, é ausência de dado.</p>
+    <div class="chart-card">
+      <p class="chart-title">% de issues fechadas (mediana, n = 956)</p>
+      <div id="chart-rq06-meter"></div>
+    </div>
+  </section>
+
+  <section class="rq" id="rq07">
+    <p class="rq-id">RQ07</p>
+    <h2 class="rq-question">Linguagens populares recebem mais contribuição, releases e atualização?</h2>
+    <p class="rq-finding">Parcialmente — e não é a linguagem com <i>mais repositórios</i> na amostra que vence. <b>Rust</b> tem a maior mediana de PRs aceitos (2.391) e <b>Go</b> a maior de releases (142), apesar de os dois terem juntos menos da metade dos repositórios de Python. Tempo desde a atualização não entra no comparativo abaixo porque a mediana é 0 em praticamente todas as linguagens (mesmo achado da RQ04).</p>
+    <div class="chart-card">
+      <p class="chart-title">PRs aceitas por linguagem (mediana)</p>
+      <div id="chart-rq07-prs"></div>
+    </div>
+    <div class="chart-card" style="margin-top:14px;">
+      <p class="chart-title">Releases por linguagem (mediana)</p>
+      <div id="chart-rq07-releases"></div>
+    </div>
+  </section>
+
+  <section class="rq" id="rq08">
+    <p class="rq-id">RQ08 · inovação do grupo</p>
+    <h2 class="rq-question">Quem tem mais estrelas recebe contribuição proporcionalmente maior?</h2>
+    <p class="rq-finding"><b>Não — a hipótese se confirma.</b> O quartil mais estrelado (Q4, mediana de 100.712 estrelas) tem a <b>menor</b> taxa de engajamento por estrela da amostra inteira: 8,35 PRs e 0,25 releases por mil estrelas, contra um pico no Q2 de 18,55 PRs e 1,19 releases por mil estrelas. Estrela parece funcionar mais como reconhecimento passivo do que como sinal de contribuição real — mas a queda não é uma linha reta do Q1 ao Q4, o pico é no Q2.</p>
+    <div class="chart-card">
+      <p class="chart-title">Engajamento por mil estrelas, por quartil de popularidade</p>
+      <div id="chart-rq08"></div>
+    </div>
+    <p class="caption">Quartis calculados sobre a própria amostra (os 1000 mais populares do GitHub) — mesmo o Q1 (menos estrelado da amostra) já tem uma mediana de 35.689 estrelas, então a comparação é relativa, não contra o universo geral de repositórios.</p>
+  </section>
+
+  <footer class="end">
+    Metodologia completa e dados brutos em <a href="https://github.com/Cardosoooo/lab-experimentacao-software" target="_blank" rel="noopener">github.com/Cardosoooo/lab-experimentacao-software</a> — <code>data/analise/</code> (resumo.csv, distribuicoes.csv, por_linguagem.csv, rq08_estrelas_engajamento.csv), calculados por <code>AnalisadorRQs.java</code> a partir de <code>data/repositorios.csv</code>, coletado em 2026‑08‑26T19:39Z.
+  </footer>
+
+</div>
+
+<script>
+(function () {
+  var SVGNS = 'http://www.w3.org/2000/svg';
+  function el(tag, attrs) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+  function fmtInt(n) { return Math.round(n).toLocaleString('pt-BR'); }
+  function fmt1(n) { return n.toLocaleString('pt-BR', {minimumFractionDigits: 1, maximumFractionDigits: 1}); }
+
+  // ---- table of contents ----
+  var toc = document.getElementById('toc');
+  document.querySelectorAll('section.rq').forEach(function (s) {
+    var id = s.querySelector('.rq-id').textContent.split(' ')[0];
+    var a = document.createElement('a');
+    a.href = '#' + s.id;
+    a.textContent = id;
+    toc.appendChild(a);
+  });
+
+  // ---- horizontal ranking bar chart ----
+  function renderRanking(containerId, items, opts) {
+    opts = opts || {};
+    var width = 620, barH = 22, gap = 11, leftPad = opts.leftPad || 168, rightPad = 70, topPad = 6;
+    var max = opts.max || Math.max.apply(null, items.map(function (d) { return d.value; }));
+    var plotW = width - leftPad - rightPad;
+    var height = items.length * (barH + gap) - gap + topPad * 2;
+    var svg = el('svg', {viewBox: '0 0 ' + width + ' ' + height, role: 'img', 'aria-label': opts.label || 'gráfico de barras'});
+
+    items.forEach(function (d, i) {
+      var y = topPad + i * (barH + gap);
+      var w = Math.max(3, (d.value / max) * plotW);
+
+      var label = el('text', {x: leftPad - 10, y: y + barH / 2 + 4, 'text-anchor': 'end', class: 'bar-label'});
+      label.textContent = d.label;
+      svg.appendChild(label);
+
+      var bar = el('rect', {x: leftPad, y: y, width: w, height: barH, rx: 4, class: 'bar-fill'});
+      var title = el('title', {});
+      title.textContent = d.label + ': ' + (opts.format ? opts.format(d.value) : d.value);
+      bar.appendChild(title);
+      svg.appendChild(bar);
+
+      var val = el('text', {x: leftPad + w + 8, y: y + barH / 2 + 4, class: 'bar-value'});
+      val.textContent = opts.format ? opts.format(d.value) : d.value;
+      svg.appendChild(val);
+    });
+
+    document.getElementById(containerId).appendChild(svg);
+  }
+
+  // ---- single proportion meter (bar with track) ----
+  function renderMeter(containerId, pct, opts) {
+    opts = opts || {};
+    var width = 620, height = 46, leftPad = 4, rightPad = 4, barH = 26;
+    var plotW = width - leftPad - rightPad;
+    var svg = el('svg', {viewBox: '0 0 ' + width + ' ' + height, role: 'img', 'aria-label': 'medidor de percentual'});
+
+    svg.appendChild(el('rect', {x: leftPad, y: 4, width: plotW, height: barH, rx: 4, class: 'meter-track'}));
+    var w = Math.max(4, (pct / 100) * plotW);
+    var fill = el('rect', {x: leftPad, y: 4, width: w, height: barH, rx: 4, class: 'meter-fill'});
+    svg.appendChild(fill);
+
+    var label = el('text', {x: leftPad + 12, y: 4 + barH / 2 + 5, fill: '#ffffff', 'font-size': '13', 'font-weight': '700'});
+    label.textContent = fmt1(pct) + '%';
+    // place label inside if it fits, else after the bar
+    if (w > 60) {
+      svg.appendChild(label);
+    } else {
+      label.setAttribute('x', leftPad + w + 10);
+      label.setAttribute('fill', 'var(--text-primary)');
+      svg.appendChild(label);
+    }
+
+    if (opts.rightNote) {
+      var note = el('text', {x: width - rightPad, y: height - 2, 'text-anchor': 'end', class: 'axis-tick'});
+      note.textContent = opts.rightNote;
+      svg.appendChild(note);
+    }
+
+    document.getElementById(containerId).appendChild(svg);
+  }
+
+  // ---- log-scale boxplot ----
+  function renderBoxplotLog(containerId, stats, opts) {
+    // stats: {min, p25, median, p75, max}; values below axisFloor are clamped visually
+    opts = opts || {};
+    var width = 640, height = 96, leftPad = 10, rightPad = 10, boxY = 26, boxH = 30;
+    var plotW = width - leftPad - rightPad;
+    var axisFloor = opts.floor;
+    var axisMax = opts.ceil;
+    var ticks = opts.ticks;
+
+    function x(v) {
+      var vv = Math.max(v, axisFloor);
+      var t = Math.log10(vv / axisFloor) / Math.log10(axisMax / axisFloor);
+      return leftPad + t * plotW;
+    }
+
+    var svg = el('svg', {viewBox: '0 0 ' + width + ' ' + height, role: 'img', 'aria-label': 'boxplot em escala logarítmica'});
+
+    // gridlines + ticks
+    ticks.forEach(function (t) {
+      var tx = x(t.value);
+      svg.appendChild(el('line', {x1: tx, x2: tx, y1: 10, y2: boxY + boxH + 6, class: 'grid-line'}));
+      var lbl = el('text', {x: tx, y: boxY + boxH + 20, 'text-anchor': 'middle', class: 'axis-tick'});
+      lbl.textContent = t.label;
+      svg.appendChild(lbl);
+    });
+
+    // whisker line min->max
+    svg.appendChild(el('line', {x1: x(stats.min), x2: x(stats.max), y1: boxY + boxH / 2, y2: boxY + boxH / 2, class: 'box-whisker'}));
+    // caps
+    [stats.min, stats.max].forEach(function (v) {
+      var cx = x(v);
+      svg.appendChild(el('line', {x1: cx, x2: cx, y1: boxY + boxH * 0.25, y2: boxY + boxH * 0.75, class: 'box-cap'}));
+    });
+    // box p25-p75
+    var bx1 = x(stats.p25), bx2 = x(stats.p75);
+    svg.appendChild(el('rect', {x: Math.min(bx1, bx2), y: boxY, width: Math.max(2, Math.abs(bx2 - bx1)), height: boxH, rx: 3, class: 'box-fill'}));
+    // median
+    var mx = x(stats.median);
+    svg.appendChild(el('line', {x1: mx, x2: mx, y1: boxY, y2: boxY + boxH, class: 'box-median'}));
+
+    var medLabel = el('text', {x: mx, y: boxY - 8, 'text-anchor': 'middle', class: 'bar-value'});
+    medLabel.textContent = opts.medianFormat ? opts.medianFormat(stats.median) : stats.median;
+    svg.appendChild(medLabel);
+
+    document.getElementById(containerId).appendChild(svg);
+  }
+
+  // ---- grouped vertical bars (RQ08: 2 series x 4 categories) ----
+  function renderGrouped(containerId, categories, series) {
+    // categories: [{label}], series: [{name, color, values:[..]}]
+    var width = 640, height = 220;
+    var padTop = 10, padBottom = 34, padLeft = 40, padRight = 10;
+    var plotW = width - padLeft - padRight, plotH = height - padTop - padBottom;
+    var groupGap = 26, barGap = 4;
+    var groupW = (plotW - groupGap * (categories.length - 1)) / categories.length;
+    var barW = (groupW - barGap * (series.length - 1)) / series.length;
+
+    var max = 0;
+    series.forEach(function (s) { s.values.forEach(function (v) { if (v > max) max = v; }); });
+    max = max * 1.15;
+
+    var svg = el('svg', {viewBox: '0 0 ' + width + ' ' + height, role: 'img', 'aria-label': 'gráfico de barras agrupadas'});
+
+    // baseline
+    var baseY = padTop + plotH;
+    svg.appendChild(el('line', {x1: padLeft, x2: width - padRight, y1: baseY, y2: baseY, class: 'axis-line'}));
+
+    categories.forEach(function (cat, ci) {
+      var gx = padLeft + ci * (groupW + groupGap);
+      series.forEach(function (s, si) {
+        var v = s.values[ci];
+        var h = (v / max) * plotH;
+        var bx = gx + si * (barW + barGap);
+        var by = baseY - h;
+        var rect = el('rect', {x: bx, y: by, width: barW, height: Math.max(1, h), rx: 4, fill: s.color});
+        var title = el('title', {}); title.textContent = s.name + ' — ' + cat.label + ': ' + fmt1(v);
+        rect.appendChild(title);
+        svg.appendChild(rect);
+
+        var val = el('text', {x: bx + barW / 2, y: by - 6, 'text-anchor': 'middle', class: 'bar-value', 'font-size': '11'});
+        val.textContent = fmt1(v);
+        svg.appendChild(val);
+      });
+      var clabel = el('text', {x: gx + groupW / 2, y: baseY + 18, 'text-anchor': 'middle', class: 'bar-label'});
+      clabel.textContent = cat.label;
+      svg.appendChild(clabel);
+    });
+
+    document.getElementById(containerId).appendChild(svg);
+
+    // legend
+    var legendWrap = document.createElement('div');
+    legendWrap.style.cssText = 'display:flex;gap:20px;margin-top:6px;flex-wrap:wrap;';
+    series.forEach(function (s) {
+      var item = document.createElement('span');
+      item.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-secondary);';
+      var sw = document.createElement('span');
+      sw.style.cssText = 'width:10px;height:10px;border-radius:2px;background:' + s.color + ';display:inline-block;';
+      item.appendChild(sw);
+      item.appendChild(document.createTextNode(s.name));
+      legendWrap.appendChild(item);
+    });
+    document.getElementById(containerId).appendChild(legendWrap);
+  }
+
+  // ================= RQ01: idade (anos), linear boxplot =================
+  (function () {
+    var stats = {min: 13/365.25, p25: 1265/365.25, median: 2819/365.25, p75: 4145/365.25, max: 6711/365.25};
+    var width = 640, height = 96, leftPad = 10, rightPad = 10, boxY = 26, boxH = 30, axisMax = 20;
+    var plotW = width - leftPad - rightPad;
+    function x(v) { return leftPad + (v / axisMax) * plotW; }
+    var svg = el('svg', {viewBox: '0 0 ' + width + ' ' + height, role: 'img', 'aria-label': 'boxplot da idade em anos'});
+    [0, 5, 10, 15, 20].forEach(function (t) {
+      var tx = x(t);
+      svg.appendChild(el('line', {x1: tx, x2: tx, y1: 10, y2: boxY + boxH + 6, class: 'grid-line'}));
+      var lbl = el('text', {x: tx, y: boxY + boxH + 20, 'text-anchor': 'middle', class: 'axis-tick'});
+      lbl.textContent = t + 'a';
+      svg.appendChild(lbl);
+    });
+    svg.appendChild(el('line', {x1: x(stats.min), x2: x(stats.max), y1: boxY + boxH / 2, y2: boxY + boxH / 2, class: 'box-whisker'}));
+    [stats.min, stats.max].forEach(function (v) {
+      var cx = x(v);
+      svg.appendChild(el('line', {x1: cx, x2: cx, y1: boxY + boxH * 0.25, y2: boxY + boxH * 0.75, class: 'box-cap'}));
+    });
+    var bx1 = x(stats.p25), bx2 = x(stats.p75);
+    svg.appendChild(el('rect', {x: bx1, y: boxY, width: bx2 - bx1, height: boxH, rx: 3, class: 'box-fill'}));
+    var mx = x(stats.median);
+    svg.appendChild(el('line', {x1: mx, x2: mx, y1: boxY, y2: boxY + boxH, class: 'box-median'}));
+    var medLabel = el('text', {x: mx, y: boxY - 8, 'text-anchor': 'middle', class: 'bar-value'});
+    medLabel.textContent = fmt1(stats.median) + ' anos';
+    svg.appendChild(medLabel);
+    document.getElementById('chart-rq01').appendChild(svg);
+  })();
+
+  // ================= RQ02: PRs aceitas, log scale =================
+  renderBoxplotLog('chart-rq02', {min: 0, p25: 175, median: 773.5, p75: 3433, max: 103684}, {
+    floor: 1, ceil: 200000,
+    ticks: [{value:1,label:'0'},{value:10,label:'10'},{value:100,label:'100'},{value:1000,label:'1 mil'},{value:10000,label:'10 mil'},{value:100000,label:'100 mil'}],
+    medianFormat: function (v) { return fmtInt(v) + ' PRs'; }
+  });
+
+  // ================= RQ03: releases, log scale =================
+  renderBoxplotLog('chart-rq03', {min: 0, p25: 0, median: 41, p75: 150, max: 1000}, {
+    floor: 1, ceil: 2000,
+    ticks: [{value:1,label:'0'},{value:10,label:'10'},{value:100,label:'100'},{value:1000,label:'1 mil'}],
+    medianFormat: function (v) { return fmtInt(v) + ' releases'; }
+  });
+
+  // ================= RQ05: meter + ranking =================
+  renderMeter('chart-rq05-meter', 70.1, {rightNote: '29,9% em outras linguagens'});
+  renderRanking('chart-rq05-rank', [
+    {label: 'Python', value: 228},
+    {label: 'TypeScript', value: 172},
+    {label: 'JavaScript', value: 109},
+    {label: 'Sem linguagem identificada', value: 88},
+    {label: 'Go', value: 77},
+    {label: 'Rust', value: 58},
+    {label: 'C++', value: 42},
+    {label: 'Java', value: 41}
+  ], {format: function (v) { return fmtInt(v) + ' repos'; }, leftPad: 190});
+
+  // ================= RQ06: meter =================
+  renderMeter('chart-rq06-meter', 87.58, {rightNote: '12,4% em aberto (mediana)'});
+
+  // ================= RQ07: ranking PRs e releases por linguagem =================
+  renderRanking('chart-rq07-prs', [
+    {label: 'Rust', value: 2391},
+    {label: 'TypeScript', value: 1977},
+    {label: 'Go', value: 1961},
+    {label: 'C++', value: 1200},
+    {label: 'Java', value: 946},
+    {label: 'JavaScript', value: 617},
+    {label: 'Python', value: 534.5},
+    {label: 'Sem linguagem identificada', value: 129.5}
+  ], {format: function (v) { return fmtInt(v); }, leftPad: 190});
+
+  renderRanking('chart-rq07-releases', [
+    {label: 'Go', value: 142},
+    {label: 'TypeScript', value: 134},
+    {label: 'Rust', value: 96.5},
+    {label: 'C++', value: 59},
+    {label: 'Java', value: 55},
+    {label: 'JavaScript', value: 39},
+    {label: 'Python', value: 21},
+    {label: 'Sem linguagem identificada', value: 0}
+  ], {format: function (v) { return fmt1(v); }, leftPad: 190});
+
+  // ================= RQ08: grouped bars por quartil =================
+  renderGrouped('chart-rq08',
+    [{label: 'Q1 · 35,7 mil★'}, {label: 'Q2 · 43,3 mil★'}, {label: 'Q3 · 58,7 mil★'}, {label: 'Q4 · 100,7 mil★'}],
+    [
+      {name: 'PRs por mil estrelas', color: 'var(--blue)', values: [14.13, 18.55, 15.14, 8.35]},
+      {name: 'Releases por mil estrelas', color: 'var(--orange)', values: [1.15, 1.19, 0.75, 0.25]}
+    ]
+  );
+})();
+</script>

@@ -1,0 +1,259 @@
+<title>StarMiner Dashboard</title>
+<style>
+  :root {
+    color-scheme: light;
+    --page:        #f9f9f7;
+    --surface-1:   #fcfcfb;
+    --surface-2:   #ffffff;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:        #e1e0d9;
+    --border:      rgba(11,11,11,0.10);
+    --track:       #e9edf5;
+
+    --blue:    #2a78d6;
+    --orange:  #eb6834;
+    --ember:   #c98504;
+
+    --good:      #0ca30c;
+    --good-bg:   #e7f6e7;
+    --warning:   #b8790a;
+    --warning-bg:#fdf1dd;
+
+    --font: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "Cascadia Code", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --page: #0d0d0d;
+      --surface-1: #1a1a19;
+      --surface-2: #202020;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --border: rgba(255,255,255,0.10);
+      --track: #22314a;
+      --blue: #3987e5;
+      --orange: #d95926;
+      --ember: #e3a008;
+      --good: #22c55e;
+      --good-bg: rgba(34,197,94,0.14);
+      --warning: #f0b429;
+      --warning-bg: rgba(240,180,41,0.14);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page: #0d0d0d;
+    --surface-1: #1a1a19;
+    --surface-2: #202020;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --border: rgba(255,255,255,0.10);
+    --track: #22314a;
+    --blue: #3987e5;
+    --orange: #d95926;
+    --ember: #e3a008;
+    --good: #22c55e;
+    --good-bg: rgba(34,197,94,0.14);
+    --warning: #f0b429;
+    --warning-bg: rgba(240,180,41,0.14);
+  }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text-primary); font-family: var(--font); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: clamp(20px, 4vw, 44px) 20px 60px; }
+
+  header.top { margin-bottom: 28px; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blue); }
+  h1 { font-size: clamp(24px, 3.4vw, 32px); margin: 6px 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
+  .dek { font-size: 14.5px; color: var(--text-secondary); margin: 0 0 14px; max-width: 70ch; line-height: 1.55; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12.5px; }
+  .links a { color: var(--blue); text-decoration: none; }
+  .links a:hover { text-decoration: underline; }
+  .links .sep { color: var(--text-muted); }
+
+  section { margin-bottom: 30px; }
+  .section-title { font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); margin: 0 0 12px; }
+
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 760px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .kpi {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .kpi .val { font-family: var(--mono); font-weight: 700; font-size: clamp(24px, 3vw, 30px); line-height: 1; color: var(--text-primary); }
+  .kpi .lbl { font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+
+  .cols-2 { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; align-items: start; }
+  @media (max-width: 820px) { .cols-2 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  /* sprint timeline */
+  .sprint-row { display: flex; flex-direction: column; gap: 0; }
+  .sprint-item {
+    display: grid; grid-template-columns: 20px 100px 1fr; gap: 12px; align-items: start;
+    padding: 11px 0; border-top: 1px solid var(--border);
+  }
+  .sprint-item:first-child { border-top: none; }
+  .sprint-dot { width: 18px; height: 18px; border-radius: 50%; margin-top: 1px; display: flex; align-items: center; justify-content: center; }
+  .sprint-dot.done { background: var(--good-bg); color: var(--good); }
+  .sprint-dot.progress { background: var(--warning-bg); color: var(--warning); }
+  .sprint-dot svg { width: 11px; height: 11px; }
+  .sprint-name { font-family: var(--mono); font-size: 12.5px; font-weight: 700; color: var(--text-primary); padding-top: 1px; }
+  .sprint-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: 8px; }
+  .pill.done { background: var(--good-bg); color: var(--good); }
+  .pill.progress { background: var(--warning-bg); color: var(--warning); }
+
+  /* kanban mini board */
+  .kanban { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 4px; }
+  @media (max-width: 700px) { .kanban { grid-template-columns: repeat(2, 1fr); } }
+  .kcol { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px; min-height: 90px; }
+  .kcol h4 {
+    margin: 2px 4px 8px; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    color: var(--text-muted); display: flex; justify-content: space-between; align-items: center;
+  }
+  .wip-badge { font-family: var(--mono); font-size: 10px; background: var(--ember); color: #fff; border-radius: 999px; padding: 1px 7px; }
+  .kcard { background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; margin-bottom: 6px; line-height: 1.3; }
+  .kcard b { font-family: var(--mono); color: var(--blue); font-weight: 700; }
+  .kanban-meta { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; font-size: 12.5px; color: var(--text-secondary); }
+  .kanban-meta b { color: var(--text-primary); }
+
+  /* RQ grid */
+  .rq-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (max-width: 700px) { .rq-grid { grid-template-columns: 1fr; } }
+  .rq-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 13px 15px; }
+  .rq-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+  .rq-id { font-family: var(--mono); font-weight: 700; font-size: 12.5px; color: var(--text-muted); }
+  .rq-num { font-family: var(--mono); font-weight: 700; font-size: 20px; color: var(--blue); }
+  .rq-text { font-size: 12.5px; color: var(--text-secondary); line-height: 1.45; }
+
+  footer.end { margin-top: 10px; font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+  footer.end a { color: var(--blue); text-decoration: none; }
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">Lab01 — Painel do projeto</p>
+    <h1>StarMiner</h1>
+    <p class="dek">Mineração e análise dos 1000 repositórios mais populares do GitHub — visão geral do progresso técnico e do processo Kanban.</p>
+    <div class="links">
+      <a href="https://github.com/Cardosoooo/lab-experimentacao-software" target="_blank" rel="noopener">Repositório</a>
+      <span class="sep">·</span>
+      <a href="https://github.com/users/Cardosoooo/projects/2" target="_blank" rel="noopener">Kanban Sprint 1</a>
+      <span class="sep">·</span>
+      <a href="https://claude.ai/code/artifact/f9c9cd88-297f-4850-8c8f-f58e36d60e6c" target="_blank" rel="noopener">Relatório interativo das RQs</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="kpi-row">
+      <div class="kpi"><div class="val">1.000</div><div class="lbl">repositórios coletados (26/08/2026)</div></div>
+      <div class="kpi"><div class="val">8</div><div class="lbl">Questões de Pesquisa (7 do enunciado + RQ08)</div></div>
+      <div class="kpi"><div class="val">31/31</div><div class="lbl">testes automatizados passando</div></div>
+      <div class="kpi"><div class="val">9/11</div><div class="lbl">Issues concluídas no board</div></div>
+    </div>
+  </section>
+
+  <section class="cols-2">
+    <div class="card">
+      <p class="section-title">Progresso das sprints</p>
+      <div class="sprint-row">
+        <div class="sprint-item">
+          <div class="sprint-dot done"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sprint-name">Lab01S01</div>
+          <div class="sprint-desc">Consulta GraphQL (100 repos) + GitHub Projects criado <span class="pill done">concluída</span></div>
+        </div>
+        <div class="sprint-item">
+          <div class="sprint-dot done"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sprint-name">Lab01S02</div>
+          <div class="sprint-desc">Paginação (1000 repos) + CSV + snapshot do Kanban <span class="pill done">concluída</span></div>
+        </div>
+        <div class="sprint-item">
+          <div class="sprint-dot progress">●</div>
+          <div class="sprint-name">Lab01S03</div>
+          <div class="sprint-desc">Métricas das 8 RQs calculadas — visualização gráfica em finalização <span class="pill progress">quase lá</span></div>
+        </div>
+        <div class="sprint-item">
+          <div class="sprint-dot done"><svg viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="sprint-name">Relatório Final</div>
+          <div class="sprint-desc">Documento completo, seguindo o template da disciplina <span class="pill done">entregue</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="section-title">Coleta de dados</p>
+      <div class="sprint-row">
+        <div class="sprint-item" style="grid-template-columns: 1fr;">
+          <div>
+            <div class="sprint-desc"><b style="color:var(--text-primary)">88</b> repositórios sem linguagem identificada (mantidos, normalizados)</div>
+          </div>
+        </div>
+        <div class="sprint-item" style="grid-template-columns: 1fr;">
+          <div class="sprint-desc"><b style="color:var(--text-primary)">44</b> repositórios sem nenhuma issue (excluídos só do cálculo da RQ06)</div>
+        </div>
+        <div class="sprint-item" style="grid-template-columns: 1fr;">
+          <div class="sprint-desc"><b style="color:var(--text-primary)">0</b> registros descartados — dataset 100% completo</div>
+        </div>
+        <div class="sprint-item" style="grid-template-columns: 1fr;">
+          <div class="sprint-desc">Zero dependência externa — Java 17 puro, parser JSON próprio</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-title">Kanban — GitHub Projects v2</p>
+    <div class="card">
+      <div class="kanban">
+        <div class="kcol"><h4>Backlog<span>1</span></h4>
+          <div class="kcard"><b>#11</b> Visualização gráfica das RQs</div>
+        </div>
+        <div class="kcol"><h4>To Do<span>0</span></h4></div>
+        <div class="kcol"><h4>Doing<span class="wip-badge">WIP 1/1</span></h4>
+          <div class="kcard"><b>#10</b> Cálculo das métricas das RQs</div>
+        </div>
+        <div class="kcol"><h4>Review<span>0</span></h4></div>
+        <div class="kcol"><h4>Done<span>9</span></h4>
+          <div class="kcard">#1–#9</div>
+        </div>
+      </div>
+      <div class="kanban-meta">
+        <span>Integrante: <b>Gabriel Cardoso</b></span>
+        <span>WIP na coluna Doing: <b>1</b></span>
+        <span>Snapshots exportados: <b>4</b> (18/08, 19/08, 20/08, 26/08)</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="section-title">Achados por Questão de Pesquisa</p>
+    <div class="rq-grid">
+      <div class="rq-card"><div class="rq-top"><span class="rq-id">RQ01 · Idade</span><span class="pill done">confirmada</span></div><div class="rq-num">7,7 anos</div><div class="rq-text">Idade mediana dos 1000 repositórios — maduros, não recentes.</div></div>
+      <div class="rq-card"><div class="rq-top"><span class="rq-id">RQ02 · PRs aceitas</span><span class="pill done">confirmada</span></div><div class="rq-num">774</div><div class="rq-text">Mediana de PRs aceitas; distribuição bem assimétrica (máx. 103.684).</div></div>
+      <div class="rq-card"><div class="rq-top"><span class="rq-id">RQ03 · Releases</span><span class="pill progress">parcial</span></div><div class="rq-num">41</div><div class="rq-text">Mediana de releases, mas 25% da amostra não tem nenhuma.</div></div>
+      <div class="rq-card"><div class="rq-top"><span class="rq-id">RQ04 · Atualização</span><span class="pill done">confirmada</span></div><div class="rq-num">0 dias</div><div class="rq-text">Mediana de dias desde a última atualização — quase todos ativos.</div></div>
+      <div class="rq-card"><div class="rq-top"><span class="rq-id">RQ05 · Linguagem</span><span class="pill done">confirmada</span></div><div class="rq-num">70,1%</div><div class="rq-text">Dos repositórios estão em linguagem popular (Octoverse 2025).</div></div>
+      <div class="rq-card"><div class="rq-top"><span class="rq-id">RQ06 · Issues fechadas</span><span class="pill done">confirmada</span></div><div class="rq-num">87,6%</div><div class="rq-text">Mediana de fechamento (n=956; 44 sem issues excluídos).</div></div>
+      <div class="rq-card"><div class="rq-top"><span class="rq-id">RQ07 · Linguagem × contribuição</span><span class="pill progress">parcial</span></div><div class="rq-num">Rust / Go</div><div class="rq-text">Lideram em PRs/releases, apesar de menos repositórios que Python.</div></div>
+      <div class="rq-card"><div class="rq-top"><span class="rq-id">RQ08 · Inovação</span><span class="pill done">confirmada</span></div><div class="rq-num">Q4 = 8,35</div><div class="rq-text">PRs/mil★ no quartil mais estrelado — o menor da amostra.</div></div>
+    </div>
+  </section>
+
+  <footer class="end">
+    Dados de <code>data/analise/</code> (resumo.csv, distribuicoes.csv, por_linguagem.csv, rq08_estrelas_engajamento.csv), calculados por <code>AnalisadorRQs.java</code>. Board consultado ao vivo via GraphQL em 26/08/2026.
+  </footer>
+
+</div>

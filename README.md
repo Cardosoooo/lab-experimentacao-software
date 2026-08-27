@@ -130,6 +130,15 @@ RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de i
 - **Hipótese informal:** a relação não é proporcional — repositórios hiper-populares devem ter uma taxa de PRs/releases por estrela **menor**, porque dar estrela é um clique sem custo e contribuir exige trabalho de verdade.
 - Detalhada em [relatorio/introducao_rascunho.md](relatorio/introducao_rascunho.md), calculada por `AnalisadorRQs.java` em `data/analise/rq08_estrelas_engajamento.csv`.
 
+## Visualização gráfica
+
+Um gráfico por RQ (RQ01–RQ08), com a pergunta correspondente e os valores-chave em destaque — HTML/SVG nativo, sem biblioteca de terceiros, gerado a partir dos dados de `data/analise/`:
+
+- [visualizacao/relatorio_interativo.html](visualizacao/relatorio_interativo.html) — um gráfico por RQ, com tabela de valores
+- [visualizacao/dashboard.html](visualizacao/dashboard.html) — painel resumido: KPIs, progresso das sprints, status do Kanban e achado principal de cada RQ
+
+Abra qualquer um dos dois arquivos direto no navegador (não precisa de servidor).
+
 ## Testes automatizados
 
 `Testes.java` cobre os utilitários de `GitHubGraphQL.java` (parser JSON, escape/parse de JSON e CSV) e os helpers específicos de cada script (`MineradorGitHub.totalCount`, `ExportadorKanban.assigneeLogins`, `AnalisadorRQs.mediana`/`quartil`), sem depender de rede — usam dados de exemplo, não fazem chamada real à API. Não usa JUnit nem nenhum framework: só `System.exit(1)` se algo falhar, o suficiente para o tamanho do projeto e consistente com a regra de não usar bibliotecas de terceiros.
