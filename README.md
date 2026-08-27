@@ -1,6 +1,6 @@
-# Lab01 — Mineração de Repositórios Populares do GitHub
+# Mineração de Repositórios Populares do GitHub
 
-Projeto da disciplina **Laboratório de Experimentação de Software** (Engenharia de Software, PUC Minas). Investiga, com dados, se os 1000 repositórios com mais estrelas do GitHub sustentam a fama de "maduros e bem cuidados" que costuma ser atribuída a projetos populares — e acompanha, em paralelo, o processo do próprio laboratório num quadro Kanban (GitHub Projects v2).
+Projeto da disciplina **Laboratório de Experimentação de Software** (Engenharia de Software, PUC Minas). Investiga, com dados, se os 1000 repositórios com mais estrelas do GitHub sustentam a fama de "maduros e bem cuidados" que costuma ser atribuída a projetos populares e acompanha, em paralelo, o processo do próprio laboratório num quadro Kanban (GitHub Projects v2).
 
 ## Integrante
 
@@ -20,7 +20,7 @@ A coleta mede, para cada um dos 1000 repositórios, os dados necessários para r
 | RQ06 | Possuem um alto percentual de issues fechadas? |
 | RQ07 | Repositórios em linguagens populares recebem mais contribuição, releases e atualizações? |
 
-A definição de métrica e o campo coletado para cada RQ estão na seção [Mapeamento das Questões de Pesquisa](#mapeamento-das-questões-de-pesquisa) abaixo. A análise e visualização desses dados (respondendo de fato as RQs) é entregue na Lab01S03 — até aqui o projeto cobre coleta, persistência dos dados e o processo do Kanban.
+A definição de métrica e o campo coletado para cada RQ estão na seção [Mapeamento das Questões de Pesquisa](#mapeamento-das-questões-de-pesquisa) abaixo.
 
 ## Estrutura do projeto
 
@@ -37,7 +37,7 @@ lab-experimentacao-software/
 │   ├── snapshots/              # um CSV por execução do ExportadorKanban (kanban_<data>.csv)
 │   └── analise/                # saída do AnalisadorRQs: resumo.csv, por_linguagem.csv, rq08_estrelas_engajamento.csv
 ├── relatorio/
-│   └── introducao_rascunho.md  # rascunho da Introdução do relatório final (hipóteses informais)
+│   └── introducao_rascunho.md  # rascunho da Introdução do relatório final
 ├── .gitignore
 └── README.md
 ```
@@ -53,7 +53,7 @@ Não há build tool (Maven/Gradle) de propósito — o enunciado proíbe bibliot
 
 ## Configuração
 
-O token **não** é commitado — ele é lido da variável de ambiente `GITHUB_TOKEN`.
+O token **não** é commitado, ele é lido da variável de ambiente `GITHUB_TOKEN`.
 
 PowerShell:
 
@@ -150,5 +150,5 @@ RQ01 e RQ04 armazenam as datas brutas (`createdAt`/`updatedAt`); o cálculo de i
 
 - **Lab01S01** ✅: consulta para 100 repositórios + GitHub Projects criado.
 - **Lab01S02** ✅: paginação para 1000 repositórios, dados em `.csv`, primeira versão do relatório com hipóteses informais, snapshot do board exportado.
-- **Lab01S03** (em andamento): métricas calculadas para as 7 RQs + RQ08 (inovação) ✅ — falta a visualização gráfica.
-- **Relatório Final**: documento consolidado com introdução, metodologia, resultados, discussão e seção de configuração do processo.
+- **Lab01S03** ✅: métricas calculadas para as 7 RQs + RQ08 (inovação), com visualização gráfica.
+- **Relatório Final** ✅: documento consolidado com introdução, metodologia, resultados, discussão e seção de configuração do processo.
