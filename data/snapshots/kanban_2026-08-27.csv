@@ -1,0 +1,15 @@
+snapshotDate,issueNumber,title,status,issueState,assignees
+2026-08-27,14,Integrar documentos,To Do,OPEN,
+2026-08-27,1,Configurar GitHub Projects e criar Issues (Sprint 1),Done,CLOSED,Cardosoooo
+2026-08-27,2,Query GraphQL para RQ01 e RQ02 (Idade e PRs),Done,CLOSED,Cardosoooo
+2026-08-27,13,RQ de inovação (RQ08) e relatório final,Done,CLOSED,Gmbferreira
+2026-08-27,12,Implementar cache local da coleta (1000 repositórios),Done,CLOSED,Gmbferreira
+2026-08-27,3,Query GraphQL para RQ03 e RQ04 (Releases e Atualizações),Done,CLOSED,Cardosoooo
+2026-08-27,4,"Query GraphQL para RQ05, RQ06 e RQ07 (Linguagem e Issues)",Done,CLOSED,Cardosoooo
+2026-08-27,5,Integrar script Java de requisição automática (100 repos),Done,CLOSED,Cardosoooo
+2026-08-27,6,Paginação para 1000 repositórios,Done,CLOSED,Cardosoooo
+2026-08-27,7,Script de exportação de snapshot do Kanban,Done,CLOSED,Cardosoooo
+2026-08-27,9,Testes automatizados e reescrita do README,Done,CLOSED,Cardosoooo
+2026-08-27,10,Cálculo das métricas das RQs,Done,CLOSED,Cardosoooo
+2026-08-27,8,Rascunho da Introdução com hipóteses informais,Done,CLOSED,Cardosoooo
+2026-08-27,11,Visualização gráfica das RQs,Done,CLOSED,Cardosoooo
