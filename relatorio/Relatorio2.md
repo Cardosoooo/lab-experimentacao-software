@@ -41,9 +41,7 @@ Além das 7 RQs do enunciado, o grupo propôs como inovação: uma nova Questão
 
 ---
 
-## 3. Inovações Propostas pelo Grupo (item 3.6 — 30% da nota)
-
-*O enunciado corresponde a 70% da exigência da disciplina; os outros 30% vêm das contribuições originais abaixo, devidamente identificadas e com resultado discutido.*
+## 3. Inovações Propostas pelo Grupo
 
 ### 3.1 Frente (a)+(b): nova RQ e métrica adicional — RQ08 (estrelas × engajamento)
 
