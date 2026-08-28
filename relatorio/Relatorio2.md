@@ -2,7 +2,7 @@
 
 **Título:** Características de repositórios populares do GitHub + Setup do Kanban
 **Disciplina:** Laboratório de Experimentação de Software 
-**Integrantes:** Gabriel Cardoso ([@Cardosoooo](https://github.com/Cardosoooo)) e Guilherme Martini Brina Ferreira ([@Gmbferreira](https://github.com/Gmbferreira))
+**Integrantes:** Gabriel Cardoso e Guilherme Martini 
 **Repositório:** https://github.com/Cardosoooo/lab-experimentacao-software
 
 ---
@@ -246,9 +246,6 @@ Os dados dos 1.000 repositórios mais populares do GitHub **confirmam, em sua ma
 As **inovações** cumpriram seu papel de contribuição original medindo algo fora do enunciado:
 * **RQ08** mostrou, de forma quantificável, que **engajamento não cresce proporcionalmente à popularidade** — no quartil mais estrelado, a taxa de PRs/releases por mil estrelas cai de forma acentuada, dando suporte à ideia de que estrela é, em grande parte, "reconhecimento passivo".
 * **Cache local** trouxe robustez e reprodutibilidade à coleta: retomada de execuções interrompidas e economia de *rate limit* — medida em execução real, com **100% de hit e 100 chamadas à API economizadas** no reuso (série em `cache_stats.csv`) — com a devida ressalva de *staleness* controlada pela flag `--refresh`.
-
-Em conjunto, o laboratório cumpriu as 7 RQs do enunciado, agregou duas frentes de inovação com resultado discutido e registrou o processo completo no GitHub Projects.
-
 ---
 
-*Documento gerado a partir dos dados em `data/analise/` e das coletas em `data/repositorios.csv`. A série de métricas do cache está em `data/analise/cache_stats.csv` (acumulada por execução).*
+
